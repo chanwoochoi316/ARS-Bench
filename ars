@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+ars_python="${ARS_PYTHON:-}"
+if [[ -z "$ars_python" && -f .ars-python ]]; then
+  IFS= read -r ars_python < .ars-python || true
+fi
+if [[ -z "$ars_python" ]]; then
+  if [[ -x .venv/bin/python ]]; then
+    ars_python=.venv/bin/python
+  else
+    ars_python=python3
+  fi
+fi
+exec "$ars_python" -m ars_bench "$@"

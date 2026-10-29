@@ -1,0 +1,14 @@
+{
+  "react": {
+    "llama8b": "meta-llama/Llama-3.1-8B-Instruct",
+    "llama70b": "meta-llama/Llama-3.3-70B-Instruct",
+    "qwen7b": "Qwen/Qwen2.5-7B-Instruct",
+    "qwen25": "Qwen/Qwen2.5-32B-Instruct"
+  },
+  "webthinker": {
+    "deepseek_7b": "lixiaoxi45/WebThinker-R1-7B",
+    "deepseek_32b": "lixiaoxi45/WebThinker-R1-32B",
+    "qwen_4b": "Qwen/Qwen3-4B-Thinking-2507",
+    "qwen_30b": "Qwen/Qwen3-30B-A3B-Thinking-2507"
+  }
+}

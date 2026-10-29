@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ars-bench"
+version = "0.1.0"
+description = "Independent attack, defense and lifecycle evaluation for Agentic RAG"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+metrics = ["numpy", "rouge-score", "sentence-transformers", "transformers"]
+agents = ["numpy", "torch", "transformers", "tqdm"]
+defenses = ["ragdefender==0.2.0", "torch", "transformers"]
+serve = ["vllm"]
+
+[project.scripts]
+ars-bench = "ars_bench.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ars_bench*"]
+
+[tool.setuptools.package-data]
+ars_bench = ["resources/*.json"]

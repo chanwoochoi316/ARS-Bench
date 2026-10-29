@@ -1,0 +1,35 @@
+{
+  "name": "paper-example",
+  "dataset": "telcodpr",
+  "architecture": "react",
+  "model": "Qwen2.5-32B-Instruct",
+  "base_url": "http://localhost:8000/v1",
+  "tokenizer": "Qwen/Qwen2.5-32B-Instruct",
+  "target_answer": "SEE YOU NEXT TIME",
+  "seed": 1,
+  "retriever": "dense",
+  "retrieval_model": "intfloat/e5-large-v2",
+  "retrieval_device": "cpu",
+  "attacks": [
+    "kidnaprag",
+    "ignore",
+    "fake_completion",
+    "poisonedrag",
+    "paradox"
+  ],
+  "defenses": [
+    "none",
+    "ragdefender",
+    "piguard",
+    "spotlight"
+  ],
+  "generation_model": "Qwen3-30B-A3B-Instruct-2507",
+  "generation_base_url": "http://localhost:8001/v1",
+  "judge_model": "gpt-4o",
+  "judge_base_url": "https://api.openai.com/v1",
+  "azure_shield": true,
+  "documents_per_search": 5,
+  "attack_scope": "all",
+  "max_steps": 10,
+  "top_k": 5
+}

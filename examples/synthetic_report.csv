@@ -1,0 +1,11 @@
+metric,value,percent,status,n,reason
+SBS,5,,ok,1,
+IBS,5,,ok,1,
+QLES,2.5,,ok,2,
+SLES,2.5,,ok,2,
+PDS,0.0,,ok,2,
+ISS,0,,ok,2,
+UFS,5.0,,ok,2,
+RCS,2.5,,ok,2,
+LI,0.5,50.0,ok,2,
+TUI,0.5,50.0,ok,2,

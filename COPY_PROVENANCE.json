@@ -1,0 +1,22 @@
+{
+  "description": "Sanitized source hashes at copy time. Runtime modules do not load historical source files.",
+  "sha256": {
+    "Rag_uni/src/retrieval/models/encoder.py": "2b6cfab6ff0814c01af5450fe46d4ce3a2b183cdf84468bff0c8e7bf7c2a0a2a",
+    "Rag_uni/src/retrieval/e5_retriever.py": "2eb3af342588bdcdc21f85e753e9a578d9d4712f9b592cf075fe5d7ac9b512a1",
+    "Rag_uni/src/retrieval/bm25_retriever.py": "b1b439ae665a679121e560e0ac0fe12ce491cf3b6ca6462ad6be6b38005ffb7d",
+    "Rag_uni/models/piguard_defender.py": "77c49b5e8a4c25d78bbf65f37c036024122fde91e45d6392c09a9cb24287ab3d",
+    "Rag_uni/models/webthinker_utils/prompts.py": "ff92d53d7a048afe9ceae45e5fe65fc714b557d8ab25ee188d78a6a5f381fe73",
+    "rag-exp/ReAct/generate_attack_doc_chanwoo_local_kill.py": "31dc6f6507a7985581b28d815c5e07d3fbbe3dbad09ed977a775f0bf474f7f6d",
+    "Rag_uni/scripts/generate_attack_doc_chanwoo_local_kill.py": "6df7d1013c4cda51090709cf837bdf1b2746c57e418ac47c8a230b4a85307154",
+    "scripts/run_PDS.py": "d03a671bd3b919ff183560a2c70ba2efc3fa3606525e192f88a5cb0898af9fbb",
+    "scripts/run_ISS_GPT.py": "02dd93be46795cc4326bb96ad451568f489665830b7a4c6212d46a9a10d86401",
+    "scripts/run_IBS_GPT.py": "f52e4b50edd426388283e1861ec5dc7aa5fec13d5a691b6599858a25e62cf2cf",
+    "rag-exp/ReAct/prompts/prompts_naive.json": "82cac224f07ce61ed0d4a75ee21905b992cf1d064ae86e0d8471dc68ab42f8ee"
+  },
+  "copied_resources": {
+    "ars_bench/resources/mal_ins.json": "a17564d495c197b01721af6d8fc593ce80d4bf561d8ceb31f499d4d8d5565acf",
+    "ars_bench/resources/react_fewshot.json": "b649969595b28d28160e7ae5e2b4cad74ab498fc71e03d72e69b65f182870c44",
+    "ars_bench/resources/kidnaprag_chain.json": "601ca410552a4c6b46c8271d1b53af01b4acbe73978b9a2ee4d0fea76e64baec"
+  },
+  "resource_note": "MAL-INS templates and KidnapRAG continuation templates were copied from the historical generators/corpus and are substituted with the configured target at runtime."
+}

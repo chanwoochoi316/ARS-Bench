@@ -1,0 +1,37 @@
+{
+  "name": "paper-example",
+  "dataset": "telcodpr",
+  "architecture": "webthinker",
+  "model": "Qwen3-30B-A3B-Thinking-2507",
+  "base_url": "http://localhost:8000/v1",
+  "tokenizer": "Qwen/Qwen3-30B-A3B-Thinking-2507",
+  "target_answer": "SEE YOU NEXT TIME",
+  "seed": 1,
+  "retriever": "dense",
+  "retrieval_model": "intfloat/e5-large-v2",
+  "retrieval_device": "cpu",
+  "attacks": [
+    "kidnaprag",
+    "ignore",
+    "fake_completion",
+    "poisonedrag",
+    "paradox"
+  ],
+  "defenses": [
+    "none",
+    "ragdefender",
+    "piguard",
+    "spotlight"
+  ],
+  "generation_model": "Qwen3-30B-A3B-Instruct-2507",
+  "generation_base_url": "http://localhost:8001/v1",
+  "judge_model": "gpt-4o",
+  "judge_base_url": "https://api.openai.com/v1",
+  "azure_shield": true,
+  "documents_per_search": 5,
+  "attack_scope": "all",
+  "max_steps": 10,
+  "top_k": 5,
+  "aux_model": "Qwen2.5-32B-Instruct",
+  "aux_base_url": "http://localhost:8002/v1"
+}
