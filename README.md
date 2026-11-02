@@ -173,7 +173,7 @@ Use the settings for your selected model in both clean and attacked inference.
 | `Qwen/Qwen2.5-7B-Instruct` | `Qwen2.5-7B-Instruct` | `0` / 1 | `cuda:1` | 0.9 |
 | `Qwen/Qwen2.5-32B-Instruct` | `Qwen2.5-32B-Instruct` | `0` / 1 | `cuda:1` | 0.9 |
 
-All ReAct models use `--dtype bfloat16 --max-model-len 30000 --trust-remote-code` when serving, and `--seed 1 --max-steps 9 --top-k 5` for inference. ReAct generation uses temperature 0, top-p 1, and 100 output tokens per call.
+All ReAct models use `--dtype bfloat16 --max-model-len 30000 --trust-remote-code` when serving, and `--seed 1 --max-steps 9 --top-k 5` for inference. During ReAct inference, each model call uses temperature 0, top-p 1, and a maximum of 100 output tokens.
 
 | WebThinker model (`--model` for serving and `--tokenizer` for inference) | Served name (`--name`) | Document profile | Seed |
 |---|---|---|---|
@@ -310,7 +310,7 @@ Run generation after the server is ready:
   --output runs/telcodpr/poisoned_corpus.jsonl
 ```
 
-Set `--target-answer` to the exact output string you want the attack to induce. KidnapRAG generates five bait documents per clean search. Only the bait documents require model generation. The program also appends 25 fixed documents once per attack artifact: 20 chain documents and five final MAL-INS documents.
+Set `--target-answer` to the exact output string you want the attack to induce. KidnapRAG generates five bait documents per clean search. Only the bait documents require model generation. The program also appends 25 fixed documents once per document set: 20 chain documents and five final instruction documents (MAL-INS).
 
 Supported `--attack` values are `kidnaprag`, `ignore`, `fake_completion`, `poisonedrag`, and `paradox`. Ignore and Fake Completion do not require a running generation model.
 
@@ -339,7 +339,7 @@ Use the same selected path for every defense variant of that experiment. The dow
 
 Use the same questions, clean index, architecture, model, and tokenizers as in step 2. Start the agent server or servers again if you stopped them for attack generation.
 
-The commands below use the downloaded KidnapRAG documents. If you generated a new set in step 3, replace `--attack-documents` with `runs/telcodpr/poisoned_corpus.jsonl`.
+The commands below use the downloaded KidnapRAG documents. If you generated a new set in step 3, set `--attack-documents runs/telcodpr/poisoned_corpus.jsonl`.
 
 ### ReAct
 
