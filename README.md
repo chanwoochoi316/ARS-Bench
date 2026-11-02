@@ -398,6 +398,8 @@ Both ReAct and WebThinker accept the following options. Replace `--defense none`
 | `--defense piguard` | PIGuard | `models/piguard` |
 | `--defense spotlight` | Spotlighting | None |
 
+Conda setup installs the RAGDefender filtering package. RAGDefender uses the `sentence-transformers/all-mpnet-base-v2` embedding weights below.
+
 Download the weights for the model-based defenses you want to use:
 
 ```bash
