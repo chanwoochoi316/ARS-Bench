@@ -22,4 +22,4 @@ ars-bench = "ars_bench.cli:main"
 include = ["ars_bench*"]
 
 [tool.setuptools.package-data]
-ars_bench = ["resources/*.json"]
+ars_bench = ["resources/*.json", "_benchmark/*.json"]

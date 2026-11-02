@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 SCHEMA = "ars-bench/1"
-DATASETS = {"hotpotqa", "legalbenchrag", "telcodpr"}
+DATASETS = {"hotpotqa", "legalbenchrag", "telcodpr", "covidqa", "tatqa"}
 
 
 def read(path):
@@ -21,7 +21,14 @@ def write(path, value):
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_name(p.name + ".tmp")
-    tmp.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    if p.suffix == ".jsonl":
+        if not isinstance(value, list):
+            raise ValueError("JSONL output requires a list of records")
+        with tmp.open("w", encoding="utf-8") as stream:
+            for row in value:
+                stream.write(json.dumps(row, ensure_ascii=False, allow_nan=False) + "\n")
+    else:
+        tmp.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     tmp.replace(p)
 
 
@@ -54,7 +61,7 @@ def normalize_step(s):
         raise ValueError("is_search must be boolean")
     out = {"thought": str(s.get("thought") or ""), "action": action,
            "search_query": query, "is_search": is_search}
-    for k in ("observation", "source", "reasoning_time_s", "reasoning_tokens", "token_count_method", "raw_documents", "defense"):
+    for k in ("observation", "source", "search_intent", "extracted_info", "reasoning_time_s", "reasoning_tokens", "token_count_method", "raw_documents", "defense"):
         if k in s:
             out[k] = s[k]
     documents = s.get("retrieved_documents", s.get("search_documents"))
@@ -86,9 +93,12 @@ def normalize_records(payload):
                "reference": nonempty(r, ("reference", "correct answer", "correct_answer", "answer")),
                "prediction": str(nonempty(r, ("prediction", "llm_answer", "final_answer"))),
                "steps": [normalize_step(s) for s in steps]}
-        for k in ("reasoning_time_s", "reasoning_tokens", "token_count_method", "target_answer", "attacker_intent", "error", "completion_status"):
+        for k in ("reasoning_time_s", "reasoning_tokens", "token_count_method", "target_answer", "attacker_intent", "error", "completion_status", "benchmark_record", "benchmark_trajectory", "benchmark_output", "generation_calls", "generation_warnings", "web_explorer", "n_calls", "n_badcalls"):
             if k in r:
                 out[k] = r[k]
+        if "benchmark_record" not in out and "step_stats" in r:
+            out["benchmark_record"] = {"id": rid, "question": out["question"],
+                "correct answer": out["reference"], "prediction": out["prediction"], "step_stats": r["step_stats"]}
         result.append(out)
     return result
 
@@ -100,6 +110,8 @@ def normalize_documents(payload):
     out = []
     seen = set()
     for i, doc in enumerate(docs):
+        if not isinstance(doc, dict):
+            raise ValueError(f"Document {i} must be a JSON object")
         rid = str(doc.get("id", doc.get("_id", f"doc-{i}")))
         if rid in seen:
             rid = f"{rid}-{i}"
@@ -119,19 +131,38 @@ def bundle(clean, attacked, documents, experiment):
         raise ValueError(f"dataset must be one of {sorted(DATASETS)}")
     if not str(experiment.get("target_answer", "")).strip():
         raise ValueError("An explicit nonempty target_answer is required")
-    return {"schema_version": SCHEMA, "experiment": experiment,
+    result = {"schema_version": SCHEMA, "experiment": experiment,
             "documents": normalize_documents(documents),
             "clean": {"records": normalize_records(clean)},
             "attacked": {"records": normalize_records(attacked)}}
+    for name, payload in (("clean", clean), ("attacked", attacked)):
+        if isinstance(payload, dict):
+            summary = payload.get("source_summary", payload.get("summary", payload.get("metrics")))
+            if isinstance(summary, dict):
+                result[name]["source_summary"] = summary
+    return result
 
 
-def load_bundle(path):
+def load_bundle(path, clean=None):
     obj = read(path)
-    if not isinstance(obj, dict) or obj.get("schema_version") != SCHEMA:
+    paired = isinstance(obj, dict) and obj.get("schema_version") == SCHEMA
+    trace = isinstance(obj, dict) and obj.get("artifact_version") == "ars-trace/1"
+    if not paired and not trace:
         raise ValueError("Use import-results to convert legacy files to an ars-bench/1 bundle")
-    if obj.get("run_status") == "partial" or obj.get("expected_record_count", len(rows(obj["attacked"]))) != len(rows(obj["attacked"])):
+    attacked = obj["attacked"] if paired else obj
+    if obj.get("run_status") == "partial" or obj.get("expected_record_count", len(rows(attacked))) != len(rows(attacked)):
         raise ValueError("Run is an incomplete checkpoint")
-    out = bundle(obj["clean"], obj["attacked"], obj.get("documents", []), obj["experiment"])
+    if clean is None and not paired:
+        raise ValueError("This inference result has no paired clean run; supply --clean <clean-result.json>")
+    baseline = clean if clean is not None else obj["clean"]
+    if isinstance(baseline, dict):
+        if baseline.get("run_status") == "partial" or baseline.get("expected_record_count", len(rows(baseline))) != len(rows(baseline)):
+            raise ValueError("Clean run is an incomplete checkpoint")
+        baseline_experiment = baseline.get("experiment", {})
+        for key in ("dataset", "architecture", "model", "seed"):
+            if baseline_experiment.get(key) is not None and obj["experiment"].get(key) is not None and baseline_experiment[key] != obj["experiment"][key]:
+                raise ValueError(f"Clean {key} differs from attacked configuration")
+    out = bundle(baseline, attacked, obj.get("documents", []), obj["experiment"])
     if "evaluation_cache" in obj:
         out["evaluation_cache"] = obj["evaluation_cache"]
     return out

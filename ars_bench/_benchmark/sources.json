@@ -1,0 +1,751 @@
+{
+  "webthinker.py": {
+    "source": "Rag_uni/models/webthinker_defense.py",
+    "source_sha256": "ec16f6d8b8a834f7a52ae5d548aaefb79ac5fd2c2fe3c2ecdc93f3b3a5da466b",
+    "selections": [
+      {
+        "names": [
+          "BEGIN_SEARCH_QUERY"
+        ],
+        "lines": [
+          123,
+          123
+        ],
+        "sha256": "d24979c657f896c721b8bf70eb5c272a52b6a4e041a655831d0834aea9e55907"
+      },
+      {
+        "names": [
+          "END_SEARCH_QUERY"
+        ],
+        "lines": [
+          124,
+          124
+        ],
+        "sha256": "056c40e5cb1fe749f36d849994393c974a35e83259d74152dd9955718e226e5b"
+      },
+      {
+        "names": [
+          "BEGIN_SEARCH_RESULT"
+        ],
+        "lines": [
+          125,
+          125
+        ],
+        "sha256": "0e5e4730af7237d54eab9d3914d81a68d9a55ca86faf129402c95f75b6b86920"
+      },
+      {
+        "names": [
+          "END_SEARCH_RESULT"
+        ],
+        "lines": [
+          126,
+          126
+        ],
+        "sha256": "db2824fc57bcc7c4a9d8adb6df9d673b809aa68dfb2fdf96fb7c66f0776c6d4b"
+      },
+      {
+        "names": [
+          "BEGIN_CLICK_LINK"
+        ],
+        "lines": [
+          128,
+          128
+        ],
+        "sha256": "dd6c0052ad0c74433716289d810fd527b5597cfe4a5f4c99bf96b13db6d1d487"
+      },
+      {
+        "names": [
+          "END_CLICK_LINK"
+        ],
+        "lines": [
+          129,
+          129
+        ],
+        "sha256": "00b9ec20642b472b5e8a4dec850d86f5ab5c1516b014a586d87a1d1c18efb795"
+      },
+      {
+        "names": [
+          "BEGIN_CLICK_RESULT"
+        ],
+        "lines": [
+          130,
+          130
+        ],
+        "sha256": "a84ed42872f01cdf4b571b02c74d7421eacce26027221d8649ed3c3ead080882"
+      },
+      {
+        "names": [
+          "END_CLICK_RESULT"
+        ],
+        "lines": [
+          131,
+          131
+        ],
+        "sha256": "c16fd7406278b90e3b6ab63fc914b1890e2126aec11d774519f1b334cf59d4e8"
+      },
+      {
+        "names": [
+          "error_indicators"
+        ],
+        "lines": [
+          133,
+          146
+        ],
+        "sha256": "6629b5cdae5d7987e7928562e0e49126aa05c52e20cf7d701f2ee7589b87c2b7"
+      },
+      {
+        "names": [
+          "invalid_search_queries"
+        ],
+        "lines": [
+          148,
+          155
+        ],
+        "sha256": "3a68edb7068b868dbc730227360d6d942e5b7ab95468890de25855eed9d695aa"
+      },
+      {
+        "names": [
+          "extract_relevant_info_e5"
+        ],
+        "lines": [
+          157,
+          179
+        ],
+        "sha256": "bc5bf89d5b799d734410634d1f63cd795681f69adc8dc168be3bebda23749c31"
+      },
+      {
+        "names": [
+          "extract_between"
+        ],
+        "lines": [
+          182,
+          192
+        ],
+        "sha256": "54598b86098e307f032b1b5add93b02bae2474bc661b39b2924329ba47899fe8"
+      },
+      {
+        "names": [
+          "format_search_results"
+        ],
+        "lines": [
+          194,
+          206
+        ],
+        "sha256": "d88b283797b6bae5b6f58c1c06e71d5f9448c62a307378cedd7e420addcae3f0"
+      },
+      {
+        "names": [
+          "defense_enabled"
+        ],
+        "lines": [
+          212,
+          213
+        ],
+        "sha256": "f03fe9c887348a5eac30a17efc008c6e2aec1599bc97933f2639c62dc498e2b4"
+      },
+      {
+        "names": [
+          "spotlight_mark_observation"
+        ],
+        "lines": [
+          216,
+          220
+        ],
+        "sha256": "e409d16d8990123c3f401db2770dc1db8a8f8a84475aa1ed5917f84c93ff2880"
+      },
+      {
+        "names": [
+          "sandwich_reminder"
+        ],
+        "lines": [
+          223,
+          224
+        ],
+        "sha256": "9bbc55ad3a5d57d8ca5db3e292e85366f558029e0bda3c8c185e7898bec39eba"
+      },
+      {
+        "names": [
+          "safe_json_loads"
+        ],
+        "lines": [
+          227,
+          246
+        ],
+        "sha256": "cbc0f6fa69bd1e6c808fa57c57bb561891f8f25187e0fb188a096af9ae38bcb1"
+      },
+      {
+        "names": [
+          "taskshield_extract_instructions_async"
+        ],
+        "lines": [
+          249,
+          297
+        ],
+        "sha256": "6660dc1df26ed6527dd9c5867763133d80d8572fb054f55eca7f8741c14be61c"
+      },
+      {
+        "names": [
+          "taskshield_check_alignment_async"
+        ],
+        "lines": [
+          300,
+          376
+        ],
+        "sha256": "373d047959ea244ff6d88c008dbe65ecf2f2877a8bb424c7585fd5484d0df525"
+      },
+      {
+        "names": [
+          "taskshield_check_text_async"
+        ],
+        "lines": [
+          379,
+          416
+        ],
+        "sha256": "8d362cf43badc2d92b5d13ae47cdb929fb38c52986c2009636ea61619c2f5acb"
+      },
+      {
+        "names": [
+          "taskshield_check_search_query_async"
+        ],
+        "lines": [
+          419,
+          441
+        ],
+        "sha256": "eb84416b2e7cf992879a0a01d172cb016b655f3c0beacca5086f4220d1f8abba"
+      },
+      {
+        "names": [
+          "taskshield_feedback"
+        ],
+        "lines": [
+          444,
+          457
+        ],
+        "sha256": "89ed6c13ebff10f0e4eed16a61966f8aab63c345ac821862285de71a1f93f866"
+      },
+      {
+        "names": [
+          "apply_retrieved_text_defenses"
+        ],
+        "lines": [
+          460,
+          466
+        ],
+        "sha256": "0e385d9e32a108ed5ce97eacac4bb0465d2aacb44ece79b73f1024545b221c38"
+      },
+      {
+        "names": [
+          "generate_response"
+        ],
+        "lines": [
+          469,
+          542
+        ],
+        "sha256": "96ccff9ef04cc762e2721f7cb35d8285dd80ebd8e7b0c2cf1d9354d127e9bf42"
+      },
+      {
+        "names": [
+          "generate_deep_web_explorer"
+        ],
+        "lines": [
+          545,
+          816
+        ],
+        "sha256": "4ad7ba4338da242360adb417276d7d4494f30dd74b96aa2708da0bc127dbacaf"
+      },
+      {
+        "names": [
+          "process_single_sequence"
+        ],
+        "lines": [
+          819,
+          1256
+        ],
+        "sha256": "3ac5d7fe49bf58da0189e5d84dbca4e94fd19e15af2e681660c7d9266015ab36"
+      }
+    ],
+    "copied_sha256": "2c98801355c46f0537aa87cf53b045d42494005002dcc0bac4a554917815e10a"
+  },
+  "web_prompts.py": {
+    "source": "Rag_uni/models/webthinker_utils/prompts.py",
+    "source_sha256": "301e7745c7e0807e24d59495c347792ce0789f8a08a3dc858e39768f62ae9405",
+    "selections": [
+      {
+        "names": [
+          "get_deep_web_explorer_instruction"
+        ],
+        "lines": [
+          26,
+          61
+        ],
+        "sha256": "25ee55e99fb1f74380506212defeeefd215a16e83417733a17f79ec62220ae3e"
+      },
+      {
+        "names": [
+          "get_web_page_reader_instruction"
+        ],
+        "lines": [
+          63,
+          66
+        ],
+        "sha256": "cdc14a398c997ea0d1d78754c1cd20a8051ad7a1cd9d480458baa50b003e74a9"
+      },
+      {
+        "names": [
+          "get_search_intent_instruction"
+        ],
+        "lines": [
+          87,
+          90
+        ],
+        "sha256": "4a86316156b0d782df8fc32967b17c71f77a8d570d50969a1833809058ca23dc"
+      },
+      {
+        "names": [
+          "get_click_intent_instruction"
+        ],
+        "lines": [
+          93,
+          96
+        ],
+        "sha256": "03e8b085f89a0518c824feccbea2e6c737069401e11c2f60f2200450b7fd3ab5"
+      },
+      {
+        "names": [
+          "get_multiqa_search_o1_instruction"
+        ],
+        "lines": [
+          247,
+          271
+        ],
+        "sha256": "fa9743ef56b2fb2f7e4eea17b96341a04a6cfa40c7efcf59b369c08beb4607cf"
+      },
+      {
+        "names": [
+          "get_task_instruction_openqa"
+        ],
+        "lines": [
+          308,
+          327
+        ],
+        "sha256": "f695246a0146ecc62431c7c63329d7cc64e9dddeac390d2aa9098cfea38859d2"
+      }
+    ],
+    "copied_sha256": "121539221201da5a0f1da615a586f42e1b9fc2813f5c42f6c0d92cf359a7288e"
+  },
+  "web_answer.py": {
+    "source": "Rag_uni/models/webthinker_utils/evaluate.py",
+    "source_sha256": "fc50776e45d19fcdd3dbf8399b6c30a29cdda2a574abdfd1a572e582ca5a2aa5",
+    "selections": [
+      {
+        "names": [
+          "extract_answer_fn"
+        ],
+        "lines": [
+          17,
+          89
+        ],
+        "sha256": "1b1c4ea2839cb12cc1339b094e855302474a8af3368aee1e3a51b2b0d6a1f688"
+      }
+    ],
+    "copied_sha256": "06365fa1af5b9e6d419b4e7e1b788f34cd4eefd380aed9d5db101554a3682044"
+  },
+  "react.py": {
+    "source": "rag-exp/ReAct/attack_react_so_kyuho.py",
+    "source_sha256": "da3f5ad81380ece931c5a38916b8d2ad006362a1d3e8209b22fa1c6d11b30b19",
+    "selections": [
+      {
+        "names": [
+          "instruction"
+        ],
+        "lines": [
+          231,
+          235
+        ],
+        "sha256": "e80670126204b71f876a2935c0f4eb57e5ed5da8ce1273c4ffaf50aeb838e2bc"
+      },
+      {
+        "names": [
+          "webthink"
+        ],
+        "lines": [
+          238,
+          313
+        ],
+        "sha256": "fa53f1729fdb8317875144827c3822c7caa64b6fbdc82c62617c6dbf8fd16acf"
+      }
+    ],
+    "copied_sha256": "16b9c7a9b5bf0ea50820c05c0c04f64ae727fa9e43d7ee3c4f75cc3aa4337cf7",
+    "adaptation": "Inject env/llm/step through a per-call namespace; default prompt supplied by adapter; max_steps parameter defaults to original 9."
+  },
+  "attack_prompts.py": {
+    "source": "rag-exp/ReAct/generate_attack_doc_chanwoo_local_kill.py",
+    "source_sha256": "cef1bfc54e7436d95f580fb030d972103a2f1358c601199c876af1db948f9462",
+    "selections": [
+      {
+        "names": [
+          "EXAMPLES"
+        ],
+        "lines": [
+          13,
+          85
+        ],
+        "sha256": "bd40ecd13b367e596f578d8cef696b475af51f8df6baae89482040b09aef1fa3"
+      },
+      {
+        "names": [
+          "IGNORE_ATTACK_SENTENCES"
+        ],
+        "lines": [
+          164,
+          189
+        ],
+        "sha256": "3e850eab99d4c82591458aa040545a6b26ace3b87e531f24f435baf156c903d7"
+      },
+      {
+        "names": [
+          "build_messages"
+        ],
+        "lines": [
+          317,
+          372
+        ],
+        "sha256": "13a63c2ae9357f5e2b30723b57183bd8aa0157f2294a17efcc91e4ee770a950d"
+      }
+    ],
+    "copied_sha256": "07de5b34c71c7b6374e44837c7264e92524471f2a6fc741c1aabe2b44712a2cc"
+  },
+  "response_metrics.py": {
+    "source": "scripts/SUMMARY.py",
+    "source_sha256": "ee79399109a439f60a501f1a51c220fba22e993853cc4a9945c4256793ec71a4",
+    "selections": [
+      {
+        "names": [
+          "exposure_rates"
+        ],
+        "lines": [
+          153,
+          202
+        ],
+        "sha256": "05f48c47ef9264ff6e57f9e614032bad334e3563ee76150635e7729f07f617a5"
+      },
+      {
+        "names": [
+          "normalize"
+        ],
+        "lines": [
+          205,
+          206
+        ],
+        "sha256": "d710d7603df92f403704f7c4b075a80feb9f1e1c8f86fb1eb043543730802fac"
+      },
+      {
+        "names": [
+          "reference"
+        ],
+        "lines": [
+          209,
+          214
+        ],
+        "sha256": "6072b8b927cdc7c477481693bbb26f8fa3fcb4e91465fd6e9fa01c6876f8d933"
+      },
+      {
+        "names": [
+          "prediction"
+        ],
+        "lines": [
+          217,
+          218
+        ],
+        "sha256": "d3feac17fc4b8a093de55df80df24c08835b72ad7e65bea5fc450924ee1ad73c"
+      },
+      {
+        "names": [
+          "chosen_option"
+        ],
+        "lines": [
+          221,
+          229
+        ],
+        "sha256": "eb77a2fdd07f4491191509acd535eff6c41f57252ac5c5b56717f244cab3cbbf"
+      },
+      {
+        "names": [
+          "response_metric"
+        ],
+        "lines": [
+          232,
+          280
+        ],
+        "sha256": "ad44c341e5898c4c2b286fa3afe3f0a013af72195312619bb30af260b03b3455"
+      }
+    ],
+    "copied_sha256": "2cdd466c133edd5650609cd506767e60d03c78be0968af4bd9e42e5bc5ee86eb"
+  },
+  "ufs.py": {
+    "source": "scripts/SUMMARY2.py",
+    "source_sha256": "46073a5480efe400e74c827422488ae6a5da846d769577f3fdd5b8de9ea01ad5",
+    "selections": [
+      {
+        "names": [
+          "relative_ufs"
+        ],
+        "lines": [
+          87,
+          99
+        ],
+        "sha256": "13fb1e80776b9e20013d7f2ad97ddcb4b0d9ac9020b07658aae2d8d1eedaf3de"
+      }
+    ],
+    "copied_sha256": "c46f77254448a56ca86db0f55c44a70452f23fe99fe6dd45d10245eb034b3be9"
+  },
+  "efficiency.py": {
+    "source": "scripts/get_LI_and_TUI.py",
+    "source_sha256": "bca634a48fb3da37b6864111ec5c5058c4970089ec55da24fca87e742c835dbe",
+    "selections": [
+      {
+        "names": [
+          "estimate_token_count"
+        ],
+        "lines": [
+          60,
+          81
+        ],
+        "sha256": "4b3136b6f8eb9f729ffa953c8bb8bfb5553a134ef4fa9dd5fb770ca17b144d8c"
+      },
+      {
+        "names": [
+          "relative_increase"
+        ],
+        "lines": [
+          174,
+          177
+        ],
+        "sha256": "69495f4b3d6359b675d1e960fe1a07ac9a7e18abd3834bf2f97de8d871e83f14"
+      }
+    ],
+    "copied_sha256": "82ea1ba75d70e89df6e48287fed434c035e9d7ff7cfc62e51ffbf04d248ddd41"
+  },
+  "pds.py": {
+    "source": "scripts/run_PDS.py",
+    "source_sha256": "8c44fc343a8b6cf3e064d03035b1eff4621e58d8a0906aa53071ea749c867dc8",
+    "selections": [
+      {
+        "names": [
+          "clean_text"
+        ],
+        "lines": [
+          44,
+          47
+        ],
+        "sha256": "e98c93de97746071a43575b963b7aa58b5887e27536df0d344791c87fa646406"
+      },
+      {
+        "names": [
+          "build_step_text"
+        ],
+        "lines": [
+          88,
+          112
+        ],
+        "sha256": "b057897e935e505acd6b68945d16fab9dc97b98cac0cfcca429bcc686e2cb31a"
+      },
+      {
+        "names": [
+          "build_reasoning_chain"
+        ],
+        "lines": [
+          115,
+          123
+        ],
+        "sha256": "7d2b462d2816241276efb5ad9658756af98233c5c35afe9f1481cd1de56f40e8"
+      },
+      {
+        "names": [
+          "l2_normalize"
+        ],
+        "lines": [
+          130,
+          132
+        ],
+        "sha256": "8455ea3c0e3ab4d689736cc03d27ac3589068743f02aff899a6e63b6b38c831a"
+      },
+      {
+        "names": [
+          "transition_vectors"
+        ],
+        "lines": [
+          170,
+          182
+        ],
+        "sha256": "bd3d8ae5472faec8ffef605018cf46194f43807e8f3bdf261f63aadd1c6d2dd0"
+      },
+      {
+        "names": [
+          "cosine_distance_matrix"
+        ],
+        "lines": [
+          189,
+          199
+        ],
+        "sha256": "b52c1780ee0864a5fef3f07e3d77b90553221f898db02f254b528524ed711f95"
+      },
+      {
+        "names": [
+          "dtw_average_cost"
+        ],
+        "lines": [
+          202,
+          238
+        ],
+        "sha256": "9a806caaa4246473ecbb6a9ea67037b75e52fceffc4172cc9b2e2504f8bc4f81"
+      },
+      {
+        "names": [
+          "similarity_from_cost"
+        ],
+        "lines": [
+          241,
+          247
+        ],
+        "sha256": "a6e2053826b11533019a7c9d74df2f1474b48fe8e279ff85885a905a879bdf31"
+      }
+    ],
+    "copied_sha256": "2675c59500bc2a82634af9fc04aa138cc0acbd895e5ae2d61ef76d1f28c4921c"
+  },
+  "ibs.py": {
+    "source": "scripts/run_IBS_GPT.py",
+    "source_sha256": "c7d3f1c5661fe8e4fc0ddf9e2d22688aced41336df2832cdffe1644a9f43f86e",
+    "selections": [
+      {
+        "names": [
+          "MALICIOUS_SYSTEM"
+        ],
+        "lines": [
+          33,
+          45
+        ],
+        "sha256": "5e7613b80b308c2601e2b3cd86c8753bc058038e5bac1d9ea198ec3351bb4555"
+      },
+      {
+        "names": [
+          "JUDGMENT_FORMAT"
+        ],
+        "lines": [
+          47,
+          62
+        ],
+        "sha256": "9c6126d56ba4c8d019adf02a5a3c5ca8b5176f6c595ad8593cd7ba6e1e5e8e0f"
+      },
+      {
+        "names": [
+          "show"
+        ],
+        "lines": [
+          128,
+          132
+        ],
+        "sha256": "e5c8c40736c3435ede14276a86717499117837c4801a5a6165fae63ae0a6e47a"
+      },
+      {
+        "names": [
+          "malicious_prompt"
+        ],
+        "lines": [
+          147,
+          151
+        ],
+        "sha256": "e1571ddd544ed522c34bf77c53b9c8f8fff66645865a98d56ee80e4e6811aafa"
+      }
+    ],
+    "copied_sha256": "fd439404cdcb427d3b95089a086d386de2f3285161429af1e4c24970cce508a3"
+  },
+  "iss.py": {
+    "source": "scripts/run_ISS_GPT.py",
+    "source_sha256": "6830d606f980d25718997ac026ba4d1d8d6170a7d226d5c97d8b5969f90cec66",
+    "selections": [
+      {
+        "names": [
+          "OURS_INTENT"
+        ],
+        "lines": [
+          13,
+          20
+        ],
+        "sha256": "83e64f23840c3d842e668ce6831044624d95ec01d8d7ecc45f530717012f066d"
+      },
+      {
+        "names": [
+          "DEFAULT_INTENT"
+        ],
+        "lines": [
+          22,
+          24
+        ],
+        "sha256": "337700b22cfdc022406cbcb3ec73f394fc71ad41dfcc4ec04eea2a5e852827e1"
+      },
+      {
+        "names": [
+          "JUDGE_SYSTEM"
+        ],
+        "lines": [
+          26,
+          45
+        ],
+        "sha256": "70d89ace326b7d1a13fa39378ef9343d68e50fb84b050105f0d821f8ced5fda2"
+      },
+      {
+        "names": [
+          "JUDGMENT_FORMAT"
+        ],
+        "lines": [
+          47,
+          62
+        ],
+        "sha256": "537c24f0d772de886841fd8719dfbbf1425d7c48cb0fb364b5e1b7f21eb18496"
+      },
+      {
+        "names": [
+          "normalize_trajectory"
+        ],
+        "lines": [
+          132,
+          146
+        ],
+        "sha256": "dd4c9e0cdefc81616f819a85839d6c08db396700d776a24d0baae57cdf407a90"
+      },
+      {
+        "names": [
+          "judge_prompt"
+        ],
+        "lines": [
+          153,
+          162
+        ],
+        "sha256": "0ede30390a1e12575127de3f55dc56161b278f4dc9f97a07a062de761573f2bd"
+      }
+    ],
+    "copied_sha256": "29a7f2316ae55e06fdf4c0c4b7a3eca9ba92d160532c9e1fb8fdd61f0ea26291"
+  },
+  "piguard.py": {
+    "source": "Rag_uni/models/piguard_defender.py",
+    "source_sha256": "46dbbeadcfa3868f2872f0988e31ab6aa0de6991428a59854e36457886196ccb",
+    "selections": [
+      {
+        "names": [
+          "PIGuardDefender"
+        ],
+        "lines": [
+          21,
+          129
+        ],
+        "sha256": "110a43a655899f8d6eaa42292ca5668d0c8c2afa57014f65e41840bbb2157816"
+      }
+    ],
+    "copied_sha256": "6a7158aa42a69fc6c19a0eed4372ba9ebbe006d623f8317f916c177496c91be7"
+  },
+  "benchmark_react_fewshot.json": {
+    "source": "rag-exp/ReAct/prompts/prompts_naive.json",
+    "source_sha256": "82cac224f07ce61ed0d4a75ee21905b992cf1d064ae86e0d8471dc68ab42f8ee"
+  }
+}

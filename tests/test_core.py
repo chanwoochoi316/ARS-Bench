@@ -36,7 +36,7 @@ class FakeClient:
         self.calls.append((messages, options))
         if "Score rubric:" in messages[0]["content"]:
             return json.dumps({"score": 0, "reason": "synthetic fixture only"})
-        if any("Generate doc1" in m["content"] for m in messages):
+        if any("doc1" in m["content"] and "doc5" in m["content"] for m in messages):
             return json.dumps({f"doc{i}": f"synthetic bait {i}" for i in range(1, 6)})
         return "synthetic generated document"
 
@@ -226,7 +226,7 @@ class EvaluationAndAgents(unittest.TestCase):
         self.assertEqual(len(r["steps"]), 2)
         self.assertEqual(r["steps"][0]["retrieved_documents"][0]["title"], "a^b")
 
-    def test_webthinker_search_and_aux_summary(self):
+    def test_legacy_simplified_webthinker_search_and_aux_summary(self):
         class Main:
             def __init__(self): self.i = 0
             def chat(self, messages, **kw):
@@ -236,7 +236,7 @@ class EvaluationAndAgents(unittest.TestCase):
             def chat(self, messages, **kw): return "**Final Information**\ngold"
         class Search:
             def search(self, query, k): return [{"id": "d", "text": "gold", "is_poisoned": False}]
-        r = run_one(record(), "webthinker", Main(), Search(), Defense(), aux_client=Aux())
+        r = run_one(record(), "webthinker", Main(), Search(), Defense(), aux_client=Aux(), protocol="simplified")
         self.assertEqual(r["prediction"], "gold")
         self.assertEqual(r["steps"][0]["observation"], "gold")
 

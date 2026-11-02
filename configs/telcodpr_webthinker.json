@@ -27,11 +27,11 @@
   "generation_base_url": "http://localhost:8001/v1",
   "judge_model": "gpt-4o",
   "judge_base_url": "https://api.openai.com/v1",
-  "azure_shield": true,
-  "documents_per_search": 5,
   "attack_scope": "all",
   "max_steps": 10,
   "top_k": 5,
   "aux_model": "Qwen2.5-32B-Instruct",
-  "aux_base_url": "http://localhost:8002/v1"
+  "aux_base_url": "http://localhost:8002/v1",
+  "protocol": "benchmark",
+  "metric_profile": "benchmark"
 }

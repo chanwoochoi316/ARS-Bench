@@ -36,35 +36,42 @@ def pipeline(config_path, target_override=None):
               "--model", cfg["model"], "--base-url", cfg["base_url"], "--tokenizer", cfg["tokenizer"],
               "--retriever", retriever, "--corpus", corpus, "--index", index,
               "--retrieval-device", cfg.get("retrieval_device", "cpu"),
-              "--seed", cfg.get("seed", 1), "--max-steps", cfg.get("max_steps", 10),
-              "--top-k", cfg.get("top_k", 5)]
+              "--seed", cfg.get("seed", 1), "--max-steps", cfg.get("max_steps", 9 if cfg["architecture"] == "react" else 10),
+              "--top-k", cfg.get("top_k", 5), "--protocol", cfg.get("protocol", "benchmark"),
+              "--concurrency", cfg.get("concurrency", 32)]
     if cfg.get("queries"):
         common += ["--queries", cfg["queries"]]
     if cfg["architecture"] == "webthinker":
         common += ["--aux-model", cfg["aux_model"], "--aux-base-url", cfg["aux_base_url"]]
+        if cfg.get("aux_tokenizer"):
+            common += ["--aux-tokenizer", cfg["aux_tokenizer"]]
     clean = run_dir / "clean.json"
     invoke(common + ["--output", clean])
     reports = []
     incomplete = False
     shared_cache = {}
     for method in cfg.get("attacks", ["kidnaprag", "ignore", "fake_completion", "poisonedrag", "paradox"]):
-        artifact = run_dir / f"documents-{method}.json"
-        invoke(["generate", "--clean", clean, "--attack", method, "--target-answer", target,
+        artifact = run_dir / f"documents-{method}.jsonl"
+        generation = ["generate", "--clean", clean, "--attack", method, "--target-answer", target,
                 "--base-url", cfg.get("generation_base_url", cfg["base_url"]),
                 "--model", cfg.get("generation_model", "Qwen3-30B-A3B-Instruct-2507"),
                 "--seed", cfg.get("seed", 1), "--scope", cfg.get("attack_scope", "all"),
-                "--count", cfg.get("documents_per_search", 5), "--output", artifact])
+                "--output", artifact]
+        if "documents_per_search" in cfg:
+            generation += ["--count", cfg["documents_per_search"]]
+        invoke(generation)
         for defense in cfg.get("defenses", ["none", "ragdefender", "piguard", "spotlight"]):
             result = run_dir / f"result-{method}-{defense}.json"
             report = run_dir / f"report-{method}-{defense}.json"
-            invoke(common + ["--attack-documents", artifact, "--defense", defense,
+            invoke(common + ["--attack-documents", artifact, "--clean", clean, "--defense", defense,
                              "--defense-device", cfg.get("defense_device", "cpu"), "--output", result])
             obj = read(result)
             obj["evaluation_cache"] = shared_cache
             write(result, obj)
             command = ["evaluate", result, "--output", report,
                        "--embedding-model", cfg.get("embedding_model", ROOT / "models/pds"),
-                       "--device", cfg.get("evaluation_device", "cpu")]
+                       "--device", cfg.get("evaluation_device", "cpu"),
+                       "--metric-profile", cfg.get("metric_profile", "benchmark")]
             if cfg.get("judge_base_url"):
                 command += ["--judge-base-url", cfg["judge_base_url"], "--judge-model", cfg.get("judge_model", "gpt-4o")]
             if cfg.get("azure_shield", False):

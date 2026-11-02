@@ -1,0 +1,51 @@
+{
+  "audit_date": "2026-11-02",
+  "authoritative_root": "/home/work/Redteaming/Benchmark",
+  "source_sha256": {
+    "Rag_uni/scripts/webthinker/4_TOTAL_PROCESS.sh": "92750c81a70fc77685f962b75fd2f5fd8800fa253b5b04d8a48d50a17e76c38d",
+    "Rag_uni/scripts/webthinker/deepseek_32b_attack_with_defense.sh": "9eeb19d08d9c041540ad40605772a337113c11700030c4e4aa55695074f62112",
+    "Rag_uni/scripts/webthinker/qwq_attack_with_defense.sh": "5c6afc7556732cdccac995d2b1ff573b2beeb9cf3fc5246647c4025feb6ddeb4",
+    "Rag_uni/scripts/run_attack_defense.py": "cbce4e63a8567f526e170d24c0d0e87149c62c817d1db0cf316a67dd9e247cb4",
+    "Rag_uni/models/webthinker_defense.py": "ec16f6d8b8a834f7a52ae5d548aaefb79ac5fd2c2fe3c2ecdc93f3b3a5da466b",
+    "rag-exp/scripts/run_2.sh": "cd3417e0f921c5811fae9ea796d491fa27655321ba39d5a7e3de6a968713ccd0",
+    "rag-exp/ReAct/attack_react_so_kyuho.py": "da3f5ad81380ece931c5a38916b8d2ad006362a1d3e8209b22fa1c6d11b30b19",
+    "rag-exp/ReAct/e5_env.py": "d9b5ec7cba3b84aea69138411b955d4c598ddbc606ee0d365eddab5caa45b6a2",
+    "rag-exp/ReAct/wikienv.py": "daeba8969b31431960ac06f955e368ccbeb80bdf999e47defa6d7561e9d60dc9",
+    "rag-exp/ReAct/generate_attack_doc_chanwoo_local_kill.py": "cef1bfc54e7436d95f580fb030d972103a2f1358c601199c876af1db948f9462",
+    "Rag_uni/scripts/generate_attack_doc_chanwoo_local_kill.py": "7bcfa63474ef32e810c5e8cf518a23a9781fdd526969be892ce756ae6514a2f4",
+    "scripts/SUMMARY2.py": "46073a5480efe400e74c827422488ae6a5da846d769577f3fdd5b8de9ea01ad5",
+    "scripts/SUMMARY.py": "ee79399109a439f60a501f1a51c220fba22e993853cc4a9945c4256793ec71a4",
+    "scripts/get_LI_and_TUI.py": "bca634a48fb3da37b6864111ec5c5058c4970089ec55da24fca87e742c835dbe"
+  },
+  "kidnaprag_build_messages_identical_between_generators": true,
+  "runtime_dependency_on_benchmark": false,
+  "gpu_experiment_executed": false,
+  "paid_api_calls_executed": false,
+  "frozen_algorithms": "../ars_bench/_benchmark/sources.json",
+  "prompt_equivalence_checks": {
+    "rag-exp/ReAct/generate_attack_doc_chanwoo_local_kill.py": {
+      "extract_query_entity": true,
+      "graph_entity_doc_alignment_prompt": true,
+      "adversarial_doc_prompt": true,
+      "mal_ins_first_five": true
+    },
+    "Rag_uni/scripts/generate_attack_doc_chanwoo_local_kill.py": {
+      "extract_query_entity": true,
+      "graph_entity_doc_alignment_prompt": true,
+      "adversarial_doc_prompt": true,
+      "mal_ins_first_five": true
+    }
+  },
+  "encoder_byte_identical": false,
+  "validation": {
+    "unit_tests": 60,
+    "wheel_import_and_resources": "passed",
+    "pip_check": "passed",
+    "existing_attack_inputs_archive_sha256": "a7605161960fd7e4d26ff46587b328142c05ba6ab6da81f9b9ab253229d4bd34",
+    "archive_hash_matches_previous_manifest": true,
+    "wheel_sha256": "6119cd862a6df9cbf00dc89b927e099ad793883ef21a98f92369bdef37e4ab38",
+    "compile_and_diff_check": "passed"
+  },
+  "encoder_executable_ast_identical": true,
+  "encoder_adaptation": "Trailing whitespace removed, including whitespace in docstrings; executable AST identical."
+}

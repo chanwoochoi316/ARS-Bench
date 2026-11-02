@@ -4,7 +4,7 @@ These commands are instructions for the repository owner. Editing this guide doe
 
 ## 1. Choose the repository contents
 
-Publish the code, documentation, configuration examples, copied prompt resources, provenance information, tests, and the explicitly synthetic examples.
+Publish the code, documentation, configuration examples, copied prompt resources, provenance information, tests, and the explicitly synthetic test input fixture. Generated reports are excluded.
 
 The supplied `.gitignore` excludes local datasets, models, indexes, experiment outputs, `.env` variants, interpreter paths, local setup notes, and machine-specific verification reports. The publishing archive follows the same exclusions. No project-wide license has been selected by this update; preserve upstream attribution when deciding how to distribute copied components.
 
@@ -34,8 +34,8 @@ git status --short --ignored
 Stage the intended public files explicitly:
 
 ```bash
-git add .gitignore README.md pyproject.toml ars ars_bench configs docs scripts tests COPY_PROVENANCE.json
-git add examples/synthetic_result.json examples/synthetic_report.json examples/synthetic_report.csv
+git add .gitignore README.md pyproject.toml environment.yml requirements-conda.txt ars ars_bench configs docs scripts tests COPY_PROVENANCE.json
+git add examples/synthetic_result.json
 git diff --cached --stat
 git diff --cached
 ```
@@ -126,7 +126,7 @@ git push
 
 ## Large assets and fresh clones
 
-The code repository excludes local `data/`, `models/`, `indexes/`, and `runs/` directories. A fresh clone must prepare those separately, following the README. GitHub blocks ordinary Git files larger than 100 MiB; use a separate distribution channel or Git LFS when deliberately distributing large assets.
+The code repository excludes local `data/`, `models/`, `indexes/`, `runs/`, `exports/`, and build/cache directories. A fresh clone must prepare those separately, following the README. GitHub blocks ordinary Git files larger than 100 MiB; use a separate distribution channel or Git LFS when deliberately distributing large assets.
 
 ## Official references
 

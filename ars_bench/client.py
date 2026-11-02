@@ -45,14 +45,17 @@ class Client:
             content = f"<think>{reasoning}</think>\n{content}"
         return content
 
-    def complete(self, prompt, **options):
+    def completion_response(self, prompt, timeout=None, **options):
         body = {"model": self.model, "prompt": prompt, "seed": self.seed, **options}
         headers = {}
         key = os.environ.get(self.key_env)
         if key:
             headers["Authorization"] = f"Bearer {key}"
-        result = post(self.base_url + "/completions", body, headers, self.timeout)
-        return result["choices"][0]["text"]
+        result = post(self.base_url + "/completions", body, headers, timeout or self.timeout)
+        return result
+
+    def complete(self, prompt, **options):
+        return self.completion_response(prompt, **options)["choices"][0]["text"]
 
 
 def parse_object(text):

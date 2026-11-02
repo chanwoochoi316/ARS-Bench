@@ -66,7 +66,10 @@ class HTTPWorkflow(unittest.TestCase):
                 self.assertEqual(main(["evaluate", str(p/"result.json"), "--offline", "--output", str(p/"report.json"), "--require-all"]), 2)
                 report = read(p/"report.json")
                 self.assertEqual(report["metrics"]["UFS"]["value"], 0)
-                self.assertEqual(report["metrics"]["TUI"]["status"], "missing")
+                self.assertEqual(report["metrics"]["TUI"]["status"], "ok")
+                self.assertEqual(report["metrics"]["TUI"]["value"], 0)
+                self.assertEqual(report["metric_profile"], "benchmark")
+                self.assertIn("MBS", report["metrics"])
                 self.assertTrue((p/"report.csv").exists())
         finally:
             server.shutdown(); server.server_close(); thread.join()

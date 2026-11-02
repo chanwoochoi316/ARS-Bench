@@ -6,17 +6,41 @@ from pathlib import Path
 from .io import read, write, digest
 
 
+def iter_corpus(path, poisoned=False):
+    import json
+    path = Path(path)
+    def normalize(row, index):
+        if not isinstance(row, dict):
+            raise ValueError(f"Corpus document {index} must be a JSON object")
+        return {"id": str(row.get("id", row.get("_id", index))), "title": str(row.get("title", "")),
+                "text": str(row.get("text", row.get("contents", ""))), "is_poisoned": poisoned}
+    if path.suffix == ".jsonl":
+        with path.open(encoding="utf-8") as stream:
+            index = 0
+            for line in stream:
+                if line.strip():
+                    yield normalize(json.loads(line), index)
+                    index += 1
+    else:
+        documents = read(path)
+        if not isinstance(documents, list):
+            raise ValueError("Corpus must be JSONL or JSON list")
+        for index, row in enumerate(documents):
+            yield normalize(row, index)
+
+
 def load_corpus(path, poisoned=False):
-    docs = read(path)
-    if not isinstance(docs, list):
-        raise ValueError("Corpus must be JSONL or JSON list")
-    result = []
-    for i, d in enumerate(docs):
-        result.append({"id": str(d.get("id", d.get("_id", i))), "title": str(d.get("title", "")),
-                       "text": str(d.get("text", d.get("contents", ""))), "is_poisoned": poisoned})
-    if not result:
+    documents = list(iter_corpus(path, poisoned))
+    if not documents:
         raise ValueError("Corpus is empty")
-    return result
+    return documents
+
+
+def validate_clean_corpus(path, indexed_documents):
+    from itertools import zip_longest
+    for index, (provided, stored) in enumerate(zip_longest(iter_corpus(path), indexed_documents)):
+        if provided != stored:
+            raise ValueError(f"--corpus does not match the clean index at document {index}; use the matching corpus/index or rebuild the index")
 
 
 def build_index(corpus, output, model="intfloat/e5-large-v2", device="cpu", batch_size=64, shard_size=100000):
@@ -38,7 +62,7 @@ def build_index(corpus, output, model="intfloat/e5-large-v2", device="cpu", batc
 
 
 class DenseRetriever:
-    def __init__(self, index, model=None, device="cpu", attack_documents=None):
+    def __init__(self, index, model=None, device="cpu", attack_documents=None, corpus=None):
         import torch
         from .encoder import SimpleEncoder
         self.torch, self.device = torch, device
@@ -47,6 +71,8 @@ class DenseRetriever:
         self.documents = read(root / "documents.json")
         if digest(self.documents) != manifest["documents_digest"]:
             raise ValueError("Index documents differ from their manifest")
+        if corpus is not None:
+            validate_clean_corpus(corpus, self.documents)
         selected_model = model or manifest["model"]
         if model is not None and model != manifest["model"]:
             raise ValueError("Retrieval model must match the index model")

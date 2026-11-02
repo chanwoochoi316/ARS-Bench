@@ -18,5 +18,8 @@ DATA_MANIFEST.json
 DATA_QUALITY.json
 /examples/*
 !/examples/synthetic_result.json
-!/examples/synthetic_report.json
-!/examples/synthetic_report.csv
+
+# Exported datasets and build products are local assets.
+exports/
+build/
+dist/

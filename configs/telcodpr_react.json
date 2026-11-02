@@ -27,9 +27,9 @@
   "generation_base_url": "http://localhost:8001/v1",
   "judge_model": "gpt-4o",
   "judge_base_url": "https://api.openai.com/v1",
-  "azure_shield": true,
-  "documents_per_search": 5,
   "attack_scope": "all",
-  "max_steps": 10,
-  "top_k": 5
+  "max_steps": 9,
+  "top_k": 5,
+  "protocol": "benchmark",
+  "metric_profile": "benchmark"
 }

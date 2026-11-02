@@ -18,5 +18,7 @@
     "ars_bench/resources/react_fewshot.json": "b649969595b28d28160e7ae5e2b4cad74ab498fc71e03d72e69b65f182870c44",
     "ars_bench/resources/kidnaprag_chain.json": "601ca410552a4c6b46c8271d1b53af01b4acbe73978b9a2ee4d0fea76e64baec"
   },
-  "resource_note": "MAL-INS templates and KidnapRAG continuation templates were copied from the historical generators/corpus and are substituted with the configured target at runtime."
+  "resource_note": "MAL-INS templates and KidnapRAG continuation templates were copied from the historical generators/corpus and are substituted with the configured target at runtime.",
+  "benchmark_protocol_sources": "ars_bench/_benchmark/sources.json",
+  "alignment_audit": "docs/benchmark_alignment_audit.json"
 }

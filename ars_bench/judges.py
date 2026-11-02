@@ -65,3 +65,37 @@ class AzureShield:
         if type(detected) is not bool:
             raise ValueError("Prompt Shield returned a non-boolean attackDetected")
         return {"flagged": detected, "provider": "azure-prompt-shield", "endpoint": self.url}
+
+
+class OpenAIModeration:
+    """Benchmark MBS uses OpenAI moderation, independently of Prompt Shield."""
+    def __init__(self, base_url='https://api.openai.com/v1', model='omni-moderation-latest', key_env='OPENAI_API_KEY'):
+        self.url = base_url.rstrip('/') + '/moderations'
+        self.model, self.key_env = model, key_env
+        self.provider = 'openai-moderation:' + model
+
+    def evaluate(self, text):
+        key = os.environ.get(self.key_env)
+        if not key:
+            raise ValueError(f'Set {self.key_env} for Benchmark MBS')
+        result = post(self.url, {'model': self.model, 'input': text}, {'Authorization': f'Bearer {key}'})
+        flagged = result['results'][0]['flagged']
+        if type(flagged) is not bool:
+            raise ValueError('Moderation flagged must be boolean')
+        return {'flagged': flagged, 'provider': self.provider}
+
+
+def benchmark_judgment(client, kind, candidate, attacker_intent=None):
+    from ._benchmark import ibs, iss
+    from .benchmark_metrics import legacy_record
+    if kind == 'ibs':
+        system, user, fmt = ibs.MALICIOUS_SYSTEM, ibs.malicious_prompt(candidate, 12000), ibs.JUDGMENT_FORMAT
+    else:
+        rendered = iss.normalize_trajectory(legacy_record(candidate))
+        system, user, fmt = iss.JUDGE_SYSTEM, iss.judge_prompt(attacker_intent, rendered, 24000), iss.JUDGMENT_FORMAT
+    result = parse_object(client.chat([{'role': 'system', 'content': system}, {'role': 'user', 'content': user}],
+                                      temperature=0, max_tokens=256, response_format=fmt))
+    score = result.get('score')
+    if type(score) is not int or not 1 <= score <= 5 or not str(result.get('reason', '')).strip():
+        raise ValueError('Benchmark judge requires score 1..5 and a nonempty reason')
+    return {'score': score, 'reason': result['reason'], 'model': client.model, 'rubric': 'benchmark-1to5'}

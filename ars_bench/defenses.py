@@ -13,15 +13,9 @@ class Defense:
         self.method = method
         self.backend = None
         if method == "piguard":
-            from transformers import AutoModelForSequenceClassification, AutoTokenizer
-            import torch
-            self.torch = torch
-            self.device = device
+            from ._benchmark.piguard import PIGuardDefender
             path = model_path or str(Path(__file__).resolve().parent.parent / "models/piguard")
-            self.tokenizer = AutoTokenizer.from_pretrained(path, local_files_only=True, trust_remote_code=True)
-            self.model = AutoModelForSequenceClassification.from_pretrained(path, local_files_only=True, trust_remote_code=True).to(device).eval()
-            labels = {str(k).lower(): int(v) for k, v in (self.model.config.label2id or {}).items()}
-            self.injection_id = labels.get("injection", 1)
+            self.backend = PIGuardDefender(model_path=path, device=device)
         elif method == "ragdefender":
             from ragdefender import RAGDefender
             path = embedding_model or str(Path(__file__).resolve().parent.parent / "models/pds")
@@ -31,14 +25,7 @@ class Defense:
         documents = [dict(d) for d in documents]
         passages = [f"{d.get('title', '')}\n{d.get('text', d.get('contents', ''))}" for d in documents]
         removed = []
-        if self.method == "piguard" and passages:
-            for start in range(0, len(passages), 8):
-                inputs = self.tokenizer(passages[start:start + 8], padding=True, truncation=True,
-                                        max_length=512, return_tensors="pt").to(self.device)
-                with self.torch.inference_mode():
-                    ids = self.model(**inputs).logits.argmax(dim=-1).tolist()
-                removed.extend(start + i for i, label in enumerate(ids) if label == self.injection_id)
-        elif self.method == "ragdefender" and passages:
+        if self.method in {"piguard", "ragdefender"} and passages:
             _, removed = self.backend.defend(query, passages, return_indices=True)
             removed = [int(i) for i in removed]
         if any(i < 0 or i >= len(documents) for i in removed):
