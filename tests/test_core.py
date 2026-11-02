@@ -224,7 +224,8 @@ class EvaluationAndAgents(unittest.TestCase):
         self.assertEqual(r["prediction"], "gold")
         self.assertEqual(r["completion_status"], "finished")
         self.assertEqual(len(r["steps"]), 2)
-        self.assertEqual(r["steps"][0]["retrieved_documents"][0]["title"], "a^b")
+        self.assertEqual(r["steps"][0]["retrieved_documents"][0]["title"], "a b")
+        self.assertEqual(r["steps"][0]["observation"], "a^b\ngold")
 
     def test_legacy_simplified_webthinker_search_and_aux_summary(self):
         class Main:

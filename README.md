@@ -117,6 +117,8 @@ The supplied model profiles are:
 | ReAct | `llama8b`, `llama70b`, `qwen7b`, `qwen25` |
 | WebThinker | `deepseek_7b`, `deepseek_32b`, `qwen_4b`, `qwen_30b` |
 
+The supplied LegalBenchRAG and TelcoDPR question sets each contain 100 questions.
+
 Each profile contains all five datasets. Choose documents matching your inference model and architecture.
 
 ## 1. Index the clean documents
@@ -150,10 +152,11 @@ Build the dense retrieval index:
   --corpus data/telcodpr/corpus.jsonl \
   --output indexes/telcodpr/e5 \
   --model intfloat/e5-large-v2 \
-  --device cpu
+  --device cuda:2 \
+  --batch-size 1024
 ```
 
-Use `--device cuda:0` to index on an available GPU. The index stores the document metadata and embeddings. Build it once and reuse it for clean and attacked inference. To rebuild it, choose a new output directory.
+Use an available GPU for indexing. Indexing and inference use the same `intfloat/e5-large-v2` encoder. The index records its model, and inference reads that model automatically; any explicit `--retrieval-model` must match it. CUDA encoding uses FP16 with a maximum input length of 512 tokens. The index stores the document metadata and embeddings. Build it once and reuse it for clean and attacked inference. To rebuild it, choose a new output directory.
 
 ## 2. Run inference without attack documents
 
@@ -168,8 +171,8 @@ Start the agent model server:
   --model Qwen/Qwen2.5-32B-Instruct \
   --name Qwen2.5-32B-Instruct \
   --port 8000 \
-  --gpus 0,1 \
-  --tensor-parallel-size 2
+  --gpus 0 \
+  --tensor-parallel-size 1
 ```
 
 After the server is ready, run clean inference in another terminal:
@@ -181,7 +184,7 @@ After the server is ready, run clean inference in another terminal:
   --queries data/telcodpr/queries.json \
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
-  --retrieval-device cpu \
+  --retrieval-device cuda:1 \
   --model Qwen2.5-32B-Instruct \
   --base-url http://localhost:8000/v1 \
   --tokenizer Qwen/Qwen2.5-32B-Instruct \
@@ -197,8 +200,8 @@ WebThinker requires a main model server and an auxiliary model server. Start eac
   --model lixiaoxi45/WebThinker-R1-32B \
   --name WebThinker-R1-32B \
   --port 8000 \
-  --gpus 0,1 \
-  --tensor-parallel-size 2
+  --gpus 0 \
+  --tensor-parallel-size 1
 ```
 
 ```bash
@@ -206,8 +209,8 @@ WebThinker requires a main model server and an auxiliary model server. Start eac
   --model Qwen/Qwen2.5-32B-Instruct \
   --name Qwen2.5-32B-Instruct \
   --port 8002 \
-  --gpus 2,3 \
-  --tensor-parallel-size 2
+  --gpus 1 \
+  --tensor-parallel-size 1
 ```
 
 After both servers are ready:
@@ -219,7 +222,7 @@ After both servers are ready:
   --queries data/telcodpr/queries.json \
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
-  --retrieval-device cpu \
+  --retrieval-device cuda:2 \
   --model WebThinker-R1-32B \
   --base-url http://localhost:8000/v1 \
   --tokenizer lixiaoxi45/WebThinker-R1-32B \
@@ -244,9 +247,12 @@ Start the generation model in a separate terminal:
   --model Qwen/Qwen3-30B-A3B-Instruct-2507 \
   --name Qwen3-30B-A3B-Instruct-2507 \
   --port 8001 \
-  --gpus 2,3 \
-  --tensor-parallel-size 2
+  --gpus 0,1,2,3 \
+  --tensor-parallel-size 4 \
+  --profile generation
 ```
+
+The generation profile uses eager execution, GPU memory utilization of 0.9, and a context limit of `25000 × tensor-parallel-size` (100,000 tokens with four GPUs).
 
 Run generation after the server is ready:
 
@@ -300,7 +306,7 @@ The commands below use the downloaded KidnapRAG documents. If you generated a ne
   --queries data/telcodpr/queries.json \
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
-  --retrieval-device cpu \
+  --retrieval-device cuda:1 \
   --model Qwen2.5-32B-Instruct \
   --base-url http://localhost:8000/v1 \
   --tokenizer Qwen/Qwen2.5-32B-Instruct \
@@ -318,7 +324,7 @@ The commands below use the downloaded KidnapRAG documents. If you generated a ne
   --queries data/telcodpr/queries.json \
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
-  --retrieval-device cpu \
+  --retrieval-device cuda:2 \
   --model WebThinker-R1-32B \
   --base-url http://localhost:8000/v1 \
   --tokenizer lixiaoxi45/WebThinker-R1-32B \

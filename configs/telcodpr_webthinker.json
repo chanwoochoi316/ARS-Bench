@@ -9,7 +9,7 @@
   "seed": 1,
   "retriever": "dense",
   "retrieval_model": "intfloat/e5-large-v2",
-  "retrieval_device": "cpu",
+  "retrieval_device": "cuda:2",
   "attacks": [
     "kidnaprag",
     "ignore",

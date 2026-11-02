@@ -6,8 +6,8 @@
 
 | 영역 | 원본 실행 경로 | ARS 구현 (`ars_bench/` 아래) |
 |---|---|---|
-| ReAct | `rag-exp/scripts/run_2.sh` → `ReAct/attack_react_so_kyuho.py` → `e5_env.py`/`wikienv.py` | `_benchmark/react.py`, `runners/react.py` |
-| WebThinker | `Rag_uni/scripts/webthinker/4_TOTAL_PROCESS.sh` → deepseek/qwq attack-with-defense shell → `scripts/run_attack_defense.py` → `models/webthinker_defense.py` | `_benchmark/webthinker.py`, `runners/webthinker.py` |
+| ReAct | `rag-exp/scripts/run_2.sh` → `ReAct/attack_react_so_kyuho.py` / `attack_react_so_kyuho_defense.py` → `e5_env.py`/`wikienv.py` | `_benchmark/react.py`, `runners/react.py` |
+| WebThinker | `Rag_uni/scripts/webthinker/4_TOTAL_PROCESS.sh` → deepseek/qwq shell → `scripts/run_attack.py` / `run_attack_defense.py` → `models/webthinker.py` / `webthinker_defense.py` | `_benchmark/webthinker.py`, `runners/webthinker.py` |
 | 공격 생성 | 양쪽 `generate_attack_doc_chanwoo_local_kill.py` | `attacks.py`, `_benchmark/attack_prompts.py`, `paradox_prompts.py`, `resources/` |
 | 8개 평가 | `scripts/SUMMARY2.py` → `SUMMARY.py`; `run_IBS_GPT.py`, `run_ISS_GPT.py`, `run_PDS.py` | `benchmark_metrics.py`, `_benchmark/*`, `evaluation.py`, `judges.py` |
 | 효율 2개 | `scripts/get_LI_and_TUI.py` | `_benchmark/efficiency.py`, `benchmark_metrics.py` |
@@ -26,7 +26,7 @@
 | Web 모델 호출 | chat API 중심 | 원본 tokenizer template → completions → raw continuation |
 | Web trace | 중첩 탐색 기록 부족 | main/explorer 검색, conclusion, 최종 thought와 explorer 원문 |
 | Spotlight | 저장 passage 치환 | Web 원본 formatted observation/summary 경계 |
-| PIGuard | 수동 logits/label 가정 | 원본 pipeline 및 injection/label_1/1 처리 |
+| PIGuard | 아키텍처 공통 backend | ReAct 원본 logits/label-ID, Web 원본 pipeline/label 처리; CLI는 통합 유지 |
 | KidnapRAG | 추가 생성 지시/질문 prefix | 원본 messages/sampling, prefix 없이 bait5 + 체인25 |
 | PoisonedRAG | 검색별 재생성 | 질문당5개 본문을 검색별 title로 재사용 |
 | PARADOX | 검색당5개, 입력/온도 차이 | 검색당4개, subquery 원본3단계 prompt/온도1 |
@@ -56,7 +56,7 @@ KidnapRAG `build_messages`는 양쪽 원본 AST가 같다. PARADOX 3단계 promp
 
 1. COVID-QA/TAT-QA는 추가 데이터셋이며 normalized EM을 쓴다. TAT-QA 공식 전체 scorer와 같다고 주장하지 않는다.
 2. target/intent를 명시하고 문서 ID를 유일하게 만든다. 원본의 고정 target, 중복 ID, stale metadata를 복제하지 않는다. 서버 호출, seed 전달, batch 방식은 이식 계층이므로 원본 vLLM 직접 batch와 bitwise 출력이 같다는 보장은 없다.
-3. ReAct shell에는 방어 플래그가 있지만 지목된 `attack_react_so_kyuho.py`에는 해당 argparse/방어 연결이 없다. ARS 통합 방어는 실행 가능한 확장으로 유지한다. Web 방어는 원본 경계에 맞췄다. Task Shield 등 이번에 요청되지 않은 실험 방어는 CLI에 추가하지 않았다.
+3. 일반 ReAct는 `attack_react_so_kyuho.py`, 방어는 별도 `attack_react_so_kyuho_defense.py`를 기준으로 대조했다. ARS에서는 `--defense` 선택으로 같은 CLI에서 실행한다. ReAct Spotlight는 instruction 추가와 모든 observation 공백 치환, PIGuard는 원본 logits/label-ID 방식이다. Web 일반/방어의 tokenizer 선택 분기도 각각 보존한다. Task Shield 등 범위 밖 방어는 CLI에 추가하지 않았다.
 4. 데이터/기존 인덱스는 재샘플링·교체하지 않았다. 동일 수치를 비교하려면 질문 ID/순서, corpus, checkpoint/encoder revision, 생성 설정도 같아야 한다. 코퍼스/인덱스 불일치 시 조용히 truncate하는 대신 오류를 낸다. 소규모 개발 fixture의 top-k는 문서 수로 제한한다.
 5. HTTP retry 계층과 원본 GPU in-process 호출은 다르다. 같은 temperature/seed라도 엔진·batching·GPU에 따라 출력이 달라질 수 있다.
 6. 기존 runs/exports와 tar.gz는 재작성하지 않았다. 과거 clean의 프로토콜을 모르면 `baseline_protocol=legacy/unknown`으로 기록한다. 새 baseline은 `--clean`으로 지정할 수 있다.
@@ -73,3 +73,12 @@ KidnapRAG `build_messages`는 양쪽 원본 AST가 같다. PARADOX 3단계 promp
 ## SBS 전환
 
 사용자 요청에 따라 기본 지표의 MBS를 Azure Prompt Shield 기반 SBS로 교체했다. Benchmark의 `scripts/plot_rag_stage_scores.py`는 SBS 이름을 사용하지만, 검색한 평가 소스에서 Azure SBS 구현은 확인하지 못했다. 따라서 기존 ARS `AzureShield` 구현을 Microsoft 공식 [Shield Prompt REST API](https://learn.microsoft.com/en-us/rest/api/contentsafety/text-operations/shield-prompt?view=rest-contentsafety-2024-09-01)와 대조했다. API 버전은 2024-09-01, 입력은 문서 title + newline + text이며 고정 userPrompt를 함께 보낸다. 문서별 `documentsAnalysis[0].attackDetected`가 false인 비율 ×5를 SBS로 보고한다. 새 SBS 캐시 키에는 Azure provider/API 버전이 포함되며 MBS 섹션을 읽지 않는다. 다른 9개 기본 지표의 계산은 유지한다.
+
+## 최종 설정 정합성 확인
+
+- LegalBenchRAG/TelcoDPR `queries.json`은 Benchmark Web의 `_promptinject_select_100.json`에서 ID·질문·정답·순서를 확정했다. 기존 ARS 데이터도 이미 이 100문항 및 순서와 같았다.
+- E5-large-v2와 동일한 SimpleEncoder로 정상/공격 문서를 인덱싱하고 쿼리를 임베딩한다. 문서 batch=1024, 검색 encoder batch=32, max_length=512, CUDA FP16이다. index model/precision 불일치는 오류로 처리한다. README는 CUDA 인덱싱·검색을 사용한다.
+- `serve --profile generation`: tensor parallel 크기 ×25000 context, eager 실행, gpu_memory_utilization=0.9, trust_remote_code=True. README는 원본 기본 gpu_num=4에 맞춰 TP4/context100000이다. Agent 서버 기본 설정, model revision 정책, LI 계측은 유지했다.
+- Web 무방어 Qwen은 main tokenizer, 방어 Qwen은 원본 방어 파일의 선택 조건을 사용한다. 서로 다른 실행이 namespace를 공유해 오염되지 않도록 분리한다.
+- ReAct/Web 일반·방어 네 진입 파일을 확인했고, ARS 공개 추론 명령은 하나로 유지했다. 10개 평가는 SBS 및 기존 9개 지표를 유지한다.
+- 검증 상세는 [final_protocol_validation.json](final_protocol_validation.json). GPU 모델 실험과 유료 API 호출은 수행하지 않았다.

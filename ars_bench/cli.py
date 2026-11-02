@@ -36,8 +36,8 @@ def parser():
     i.add_argument("--corpus", required=True, type=Path)
     i.add_argument("--output", required=True, type=Path)
     i.add_argument("--model", default="intfloat/e5-large-v2")
-    i.add_argument("--device", default="cpu")
-    i.add_argument("--batch-size", type=int, default=64)
+    i.add_argument("--device", default="auto", help="auto selects CUDA when available, otherwise CPU")
+    i.add_argument("--batch-size", type=int, default=1024)
 
     r = sub.add_parser("run", help="Run clean or attacked ReAct/WebThinker, with a retrieval defense")
     r.add_argument("--dataset", choices=sorted(DATASETS), required=True)
@@ -47,7 +47,7 @@ def parser():
     r.add_argument("--index", type=Path)
     r.add_argument("--retriever", choices=["dense", "bm25"], default="dense")
     r.add_argument("--retrieval-model")
-    r.add_argument("--retrieval-device", default="cpu")
+    r.add_argument("--retrieval-device", default="auto")
     r.add_argument("--attack-documents", type=Path, help="Poisoned document JSONL/JSON or an ars-attack/1 artifact; omitted for clean execution")
     r.add_argument("--clean", type=Path, help="Clean inference result for paired evaluation (separate from --corpus)")
     r.add_argument("--attack", help="Attack method; inferred from document metadata when available")
@@ -129,7 +129,10 @@ def parser():
     s.add_argument("--port", type=int, default=8000)
     s.add_argument("--gpus", default="0")
     s.add_argument("--tensor-parallel-size", type=int, default=1)
-    s.add_argument("--max-model-len", type=int, default=30000)
+    s.add_argument("--max-model-len", type=int, help="Default: 30000 for agents; 25000 times tensor parallel size for generation")
+    s.add_argument("--profile", choices=["agent", "generation"], default="agent")
+    s.add_argument("--gpu-memory-utilization", type=float)
+    s.add_argument("--enforce-eager", action="store_true")
 
     q = sub.add_parser("pipeline", help="Run clean -> generate -> attack -> evaluate using a JSON configuration")
     q.add_argument("--config", required=True, type=Path)
@@ -192,7 +195,8 @@ def execute(args):
                      DenseRetriever(args.index or ROOT / "indexes" / args.dataset / "e5", args.retrieval_model,
                                     args.retrieval_device, docs, corpus=args.corpus))
         defense = Defense(args.defense, str(args.defense_model) if args.defense_model else None,
-                          args.defense_device, str(args.defense_embedding_model) if args.defense_embedding_model else None)
+                          args.defense_device, str(args.defense_embedding_model) if args.defense_embedding_model else None,
+                          architecture=args.architecture)
         experiment = {"dataset": args.dataset, "architecture": args.architecture, "model": args.model,
                       "protocol": args.protocol, "concurrency": args.concurrency,
                       "attack_documents_source": str(args.attack_documents) if args.attack_documents else None,
@@ -303,10 +307,22 @@ def execute(args):
         write(args.output, {"query": args.query, "raw_documents": docs, "documents": kept, "defense": info})
     elif args.command == "serve":
         env = dict(os.environ, CUDA_VISIBLE_DEVICES=args.gpus)
-        return subprocess.call([sys.executable, "-m", "vllm.entrypoints.openai.api_server", "--model", args.model,
-                                "--served-model-name", args.name, "--port", str(args.port),
-                                "--tensor-parallel-size", str(args.tensor_parallel_size),
-                                "--max-model-len", str(args.max_model_len)], env=env)
+        generation = args.profile == "generation"
+        length = args.max_model_len or (25000 * args.tensor_parallel_size if generation else 30000)
+        command = [sys.executable, "-m", "vllm.entrypoints.openai.api_server", "--model", args.model,
+                   "--served-model-name", args.name, "--port", str(args.port),
+                   "--tensor-parallel-size", str(args.tensor_parallel_size),
+                   "--max-model-len", str(length)]
+        if generation or args.enforce_eager:
+            command += ["--enforce-eager"]
+        if generation:
+            command += ["--trust-remote-code"]
+        utilization = args.gpu_memory_utilization if args.gpu_memory_utilization is not None else (0.9 if generation else None)
+        if utilization is not None:
+            if not 0 < utilization <= 1:
+                raise ValueError("gpu-memory-utilization must be in (0,1]")
+            command += ["--gpu-memory-utilization", str(utilization)]
+        return subprocess.call(command, env=env)
     elif args.command == "pipeline":
         from .pipeline import pipeline
         return pipeline(args.config, args.target_answer)

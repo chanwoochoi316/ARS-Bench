@@ -1,0 +1,65 @@
+{
+  "audit_date": "2026-11-02",
+  "question_sets": {
+    "legalbenchrag": {
+      "source": "Rag_uni/datasets/legalbenchrag/legalbenchrag_promptinject_select_100.json",
+      "source_sha256": "6dedb98645554d1577135e5793e07642f2fbb033ef2042ff4b4357a2a111b7a6",
+      "question_count": 100,
+      "same_content_and_order_before_update": true,
+      "queries_sha256": "a46fe18ba66f87119725cc81eb2c520cac44b29204f9b5176cdb2c6d9584a09d"
+    },
+    "telcodpr": {
+      "source": "Rag_uni/datasets/telcodpr/telcodpr_promptinject_select_100.json",
+      "source_sha256": "6182dd1c543a9fd42430f7c7c942dbe97c4800495981f8a174bc69592270934a",
+      "question_count": 100,
+      "same_content_and_order_before_update": true,
+      "queries_sha256": "2b08517f1b4357fd18bdafbcf0c581970e8754a2fde4a5366a94c8ca4a959285"
+    }
+  },
+  "indexing": {
+    "model": "intfloat/e5-large-v2",
+    "same_encoder_for_documents_and_queries": true,
+    "max_length": 512,
+    "document_batch_size": 1024,
+    "retrieval_batch_size": 32,
+    "cuda_dtype": "float16",
+    "reject_model_or_precision_mismatch": true
+  },
+  "generation_server": {
+    "context_formula": "25000 * tensor_parallel_size",
+    "readme_tensor_parallel_size": 4,
+    "readme_max_model_len": 100000,
+    "gpu_memory_utilization": 0.9,
+    "enforce_eager": true,
+    "trust_remote_code": true
+  },
+  "unified_cli": {
+    "architectures": [
+      "react",
+      "webthinker"
+    ],
+    "defenses": [
+      "none",
+      "ragdefender",
+      "piguard",
+      "spotlight"
+    ],
+    "react_spotlight_matches_defense_source": true,
+    "piguard_uses_architecture_specific_source_backend": true,
+    "web_tokenizer_routing_matches_normal_and_defended_sources": true
+  },
+  "preserved": [
+    "model revision policy",
+    "agent server defaults",
+    "LI measurement",
+    "SBS and other nine metric formulas"
+  ],
+  "validation": {
+    "unit_tests": 75,
+    "gpu_model_experiments": false,
+    "paid_api_calls": false,
+    "readme_bash_blocks": 19,
+    "readme_cli_commands": 13,
+    "unit_tests_status": "passed"
+  }
+}

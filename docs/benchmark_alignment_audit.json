@@ -15,7 +15,12 @@
     "Rag_uni/scripts/generate_attack_doc_chanwoo_local_kill.py": "7bcfa63474ef32e810c5e8cf518a23a9781fdd526969be892ce756ae6514a2f4",
     "scripts/SUMMARY2.py": "46073a5480efe400e74c827422488ae6a5da846d769577f3fdd5b8de9ea01ad5",
     "scripts/SUMMARY.py": "ee79399109a439f60a501f1a51c220fba22e993853cc4a9945c4256793ec71a4",
-    "scripts/get_LI_and_TUI.py": "bca634a48fb3da37b6864111ec5c5058c4970089ec55da24fca87e742c835dbe"
+    "scripts/get_LI_and_TUI.py": "bca634a48fb3da37b6864111ec5c5058c4970089ec55da24fca87e742c835dbe",
+    "rag-exp/ReAct/attack_react_so_kyuho_defense.py": "25ef5cb187726610b112f0bf045e335a0c7d6a9e5c6bba87f5a348754e3b226e",
+    "rag-exp/ReAct/piguard_defender.py": "ddbfd6407d9f4db8e712c68fa32d4d744ec55805372e662d70cee8ab4439bd02",
+    "Rag_uni/scripts/run_attack.py": "b3d3e8967f20e4075cd8cd72e91ac53be1fdb60713c1cd418bad0b974eeff1a6",
+    "Rag_uni/models/webthinker.py": "e8929894dfbacfc6d8385f22ea10b6e91562b4773ce4a32a1e249646d413beb7",
+    "Rag_uni/src/retrieval/indexer.py": "994622ff7f3c1dcc259d7ae2070b0890724198b7319543e93578046597e8bf84"
   },
   "kidnaprag_build_messages_identical_between_generators": true,
   "runtime_dependency_on_benchmark": false,
@@ -47,5 +52,6 @@
     "compile_and_diff_check": "passed"
   },
   "encoder_executable_ast_identical": true,
-  "encoder_adaptation": "Trailing whitespace removed, including whitespace in docstrings; executable AST identical."
+  "encoder_adaptation": "Trailing whitespace removed, including whitespace in docstrings; executable AST identical.",
+  "latest_validation": "final_protocol_validation.json"
 }

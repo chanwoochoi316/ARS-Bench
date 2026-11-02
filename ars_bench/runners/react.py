@@ -34,7 +34,10 @@ class Environment:
         if action.startswith('search[') and action.endswith(']'):
             query = action[7:-1]
             raw = self.retriever.search(query, k=self.top_k)
-            docs, defense = self.defense.apply(query, raw)
+            if self.defense.method == 'spotlight':
+                docs, defense = list(raw), {'method': 'spotlight', 'removed_indices': []}
+            else:
+                docs, defense = self.defense.apply(query, raw)
             observation = '\n'.join(f"{d.get('title', '')}\n{d.get('text', d.get('contents', ''))}" for d in docs)
             if not docs:
                 observation = f'Could not find {query}. Similar: [].'
@@ -81,10 +84,19 @@ def run_one(query, client, retriever, defense, token_counter=None, max_steps=9, 
                                stop=(stop or ['\n']) + ['\nQuestion:', '\nThought', 'Observation'])
         calls.append({'text': text, 'elapsed_s': time.perf_counter() - started})
         return text
-    namespace = {**source.__dict__, 'env': env, 'llm': llm, 'step': lambda e, a: e.step(a)}
+    def step(e, action):
+        observation, reward, done, info = e.step(action)
+        if defense.method == 'spotlight':
+            observation = observation.replace(' ', '^')
+        return observation, reward, done, info
+    namespace = {**source.__dict__, 'env': env, 'llm': llm, 'step': step}
     loop = FunctionType(source.webthink.__code__, namespace, 'webthink', source.webthink.__defaults__)
     fewshot = read(Path(__file__).resolve().parents[1] / 'resources/benchmark_react_fewshot.json')['webthink_subquery']
-    _, info = loop(idx=0, prompt=source.instruction + fewshot, to_print=False, max_steps=max_steps)
+    instruction = source.instruction
+    if defense.method == 'spotlight':
+        from .webthinker import SPOTLIGHT_SYSTEM_INSTRUCTION
+        instruction = instruction.replace('Here are some examples.', SPOTLIGHT_SYSTEM_INSTRUCTION + '\nHere are some examples.')
+    _, info = loop(idx=0, prompt=instruction + fewshot, to_print=False, max_steps=max_steps)
     original_steps = info['step_stats']
     steps, search_index = [], 0
     for item in original_steps:

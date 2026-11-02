@@ -747,5 +747,39 @@
   "benchmark_react_fewshot.json": {
     "source": "rag-exp/ReAct/prompts/prompts_naive.json",
     "source_sha256": "82cac224f07ce61ed0d4a75ee21905b992cf1d064ae86e0d8471dc68ab42f8ee"
+  },
+  "web_generation.py": {
+    "source": "Rag_uni/models/webthinker.py",
+    "source_sha256": "e8929894dfbacfc6d8385f22ea10b6e91562b4773ce4a32a1e249646d413beb7",
+    "selections": [
+      {
+        "names": [
+          "generate_response"
+        ],
+        "lines": [
+          120,
+          193
+        ],
+        "sha256": "06f8dadc668f518587335cda6ca5ec0961ab17c7d2ba9275ec6169d1e557051e"
+      }
+    ],
+    "copied_sha256": "e0670d092d0372a17f45acdf9041b56b71798df2f81802209198971b9881ff18"
+  },
+  "react_piguard.py": {
+    "source": "rag-exp/ReAct/piguard_defender.py",
+    "source_sha256": "ddbfd6407d9f4db8e712c68fa32d4d744ec55805372e662d70cee8ab4439bd02",
+    "selections": [
+      {
+        "names": [
+          "PIGuardDefender"
+        ],
+        "lines": [
+          25,
+          144
+        ],
+        "sha256": "27427e478aa908f805cd2d89ebcf8f0d9e43793f6eecbfa179a3c964d4d7e3f2"
+      }
+    ],
+    "copied_sha256": "6157cbd6c3cef7478931db2de1a4f4db610b251ddf6278aeeca570fc3695ef42"
   }
 }

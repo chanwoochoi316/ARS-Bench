@@ -6,6 +6,13 @@ from pathlib import Path
 from .io import read, write, digest
 
 
+def resolve_device(device):
+    if device == "auto":
+        import torch
+        return "cuda" if torch.cuda.is_available() else "cpu"
+    return device
+
+
 def iter_corpus(path, poisoned=False):
     import json
     path = Path(path)
@@ -43,12 +50,13 @@ def validate_clean_corpus(path, indexed_documents):
             raise ValueError(f"--corpus does not match the clean index at document {index}; use the matching corpus/index or rebuild the index")
 
 
-def build_index(corpus, output, model="intfloat/e5-large-v2", device="cpu", batch_size=64, shard_size=100000):
+def build_index(corpus, output, model="intfloat/e5-large-v2", device="auto", batch_size=1024, shard_size=100000):
     from .encoder import SimpleEncoder
     import torch
     output = Path(output)
     if (output / "manifest.json").exists():
         raise ValueError("Index already exists; choose a new output directory")
+    device = resolve_device(device)
     docs = load_corpus(corpus)
     encoder = SimpleEncoder(model, device=device, batch_size=batch_size)
     output.mkdir(parents=True, exist_ok=True)
@@ -58,13 +66,16 @@ def build_index(corpus, output, model="intfloat/e5-large-v2", device="cpu", batc
         tensor = encoder.encode_corpus(docs[start:start + shard_size])
         torch.save(tensor, output / f"embedding-shard-{i}.pt")
     write(output / "manifest.json", {"version": 1, "model": model, "count": len(docs),
-                                      "documents_digest": digest(docs)})
+                                      "documents_digest": digest(docs),
+                                      "encoding": {"device": device, "dtype": "float16" if "cuda" in device else "float32",
+                                                   "max_length": 512, "batch_size": batch_size}})
 
 
 class DenseRetriever:
-    def __init__(self, index, model=None, device="cpu", attack_documents=None, corpus=None):
+    def __init__(self, index, model=None, device="auto", attack_documents=None, corpus=None):
         import torch
         from .encoder import SimpleEncoder
+        device = resolve_device(device)
         self.torch, self.device = torch, device
         root = Path(index)
         manifest = read(root / "manifest.json")
@@ -76,17 +87,26 @@ class DenseRetriever:
         selected_model = model or manifest["model"]
         if model is not None and model != manifest["model"]:
             raise ValueError("Retrieval model must match the index model")
-        self.encoder = SimpleEncoder(selected_model, device=device)
         files = sorted(root.glob("embedding-shard-*.pt"), key=lambda p: int(p.stem.rsplit("-", 1)[1]))
         if not files:
             raise ValueError("Dense index has no embedding shards")
         self.embeddings = torch.cat([torch.load(f, map_location="cpu", weights_only=True) for f in files])
         if len(self.documents) != len(self.embeddings):
             raise ValueError("Index document and embedding counts differ")
+        expected_dtype = torch.float16 if "cuda" in device else torch.float32
+        if self.embeddings.dtype != expected_dtype:
+            raise ValueError("Index precision does not match the retrieval encoder; rebuild the index with the same CPU/CUDA device type as retrieval")
+        self.encoder = SimpleEncoder(selected_model, device=device, batch_size=32)
         if attack_documents:
             poisoned = [{**d, "is_poisoned": True} for d in attack_documents]
             self.documents.extend(poisoned)
-            self.embeddings = torch.cat([self.embeddings, self.encoder.encode_corpus(poisoned).cpu()])
+            # Match the clean/poison indexer's batch size, then restore query batching.
+            self.encoder.batch_size = 1024
+            try:
+                poison_embeddings = self.encoder.encode_corpus(poisoned).cpu()
+            finally:
+                self.encoder.batch_size = 32
+            self.embeddings = torch.cat([self.embeddings, poison_embeddings])
         self.embeddings = self.embeddings.to(device)
 
     def search(self, query, k=5):

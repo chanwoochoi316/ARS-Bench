@@ -31,11 +31,11 @@ def pipeline(config_path, target_override=None):
     if retriever == "dense" and not (Path(index) / "manifest.json").exists():
         invoke(["index", "--corpus", corpus, "--output", index,
                 "--model", cfg.get("retrieval_model", "intfloat/e5-large-v2"),
-                "--device", cfg.get("retrieval_device", "cpu")])
+                "--device", cfg.get("retrieval_device", "auto")])
     common = ["run", "--dataset", cfg["dataset"], "--architecture", cfg["architecture"],
               "--model", cfg["model"], "--base-url", cfg["base_url"], "--tokenizer", cfg["tokenizer"],
               "--retriever", retriever, "--corpus", corpus, "--index", index,
-              "--retrieval-device", cfg.get("retrieval_device", "cpu"),
+              "--retrieval-device", cfg.get("retrieval_device", "auto"),
               "--seed", cfg.get("seed", 1), "--max-steps", cfg.get("max_steps", 9 if cfg["architecture"] == "react" else 10),
               "--top-k", cfg.get("top_k", 5), "--protocol", cfg.get("protocol", "benchmark"),
               "--concurrency", cfg.get("concurrency", 32)]
