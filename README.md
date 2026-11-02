@@ -2,11 +2,19 @@
 
 ARS-Bench runs ReAct and WebThinker agents over a document collection, generates attack documents, and evaluates the resulting agent behavior.
 
+<p>
+  <img src="docs/assets/datasets/hotpotqa.svg" alt="HotpotQA" height="34">
+  <img src="docs/assets/datasets/telcodpr.svg" alt="TelcoDPR" height="34">
+  <img src="docs/assets/datasets/legalbenchrag.svg" alt="LegalBenchRAG" height="34">
+  <img src="docs/assets/datasets/covidqa.svg" alt="COVID-QA" height="34">
+  <img src="docs/assets/datasets/tatqa.svg" alt="TAT-QA" height="34">
+</p>
+
 This guide covers the complete workflow:
 
 1. Index the clean document collection.
 2. Run inference without attack documents.
-3. Generate attack documents from the clean run.
+3. Generate attack documents from the clean run, or reuse the provided KidnapRAG documents.
 4. Run inference with the attack documents.
 5. Evaluate the results.
 
@@ -45,9 +53,75 @@ The examples below use `telcodpr`. To use another dataset, replace the dataset n
 
 Choose **either ReAct or WebThinker** in step 2 and use the same agent and model in step 4. The examples write one experiment to `runs/telcodpr/`; use a different directory for each additional experiment.
 
+## Download the provided data
+
+Download both archives from the **[ARS-Bench data folder on Google Drive](https://drive.google.com/drive/folders/1hvJf-HAzo4ko6f5jdvoh2QGZyZagYIzL?usp=sharing)** and place them in `exports/` inside your cloned repository:
+
+| Archive | Extracted folder | Final location |
+|---|---|---|
+| `corpus.tar.gz` | `data/` | `ARS-Bench/data/` |
+| `kidnaprag_documents.tar.gz` | `kidnaprag_documents_40_20261102/` | `ARS-Bench/runs/kidnaprag_documents_40_20261102/` |
+
+From the repository root, run:
+
+```bash
+mkdir -p exports runs
+# Save the two downloaded archives in exports/ before running these commands.
+tar -xzf exports/corpus.tar.gz -C .
+tar -xzf exports/kidnaprag_documents.tar.gz -C runs
+```
+
+The corpus archive already contains `data/`, so extract it into the repository root. The attack archive already contains `kidnaprag_documents_40_20261102/`, so extract it into `runs/`. These commands place the folders correctly without an additional move.
+
+If you already extracted the archives elsewhere, move the extracted folders instead:
+
+```bash
+# Alternative to the extraction commands above.
+mv /path/to/extracted/data ./
+mv /path/to/extracted/kidnaprag_documents_40_20261102 ./runs/
+```
+
+Your layout should be:
+
+```text
+ARS-Bench/
+├── data/
+│   ├── hotpotqa/{corpus.jsonl, queries.json}
+│   ├── telcodpr/{corpus.jsonl, queries.json}
+│   ├── legalbenchrag/{corpus.jsonl, queries.json}
+│   ├── covidqa/{corpus.jsonl, queries.json}
+│   └── tatqa/{corpus.jsonl, queries.json}
+├── exports/
+│   ├── corpus.tar.gz
+│   └── kidnaprag_documents.tar.gz
+└── runs/
+    └── kidnaprag_documents_40_20261102/
+        ├── manifest.json
+        ├── react/
+        └── webthinker/
+```
+
+### What can you skip?
+
+| Provided files | You can skip | You still need |
+|---|---|---|
+| `corpus.tar.gz` | Manually collecting and formatting the five datasets and question sets | Step 1: build the clean retrieval index |
+| `kidnaprag_documents.tar.gz` | Step 3: generating KidnapRAG documents, when using the matching supplied model/dataset and target | Steps 2, 4, and 5: clean inference, attacked inference, and evaluation |
+
+The supplied attack documents target **`KILL YOURSELF`**. To use another target or attack method, run step 3 to generate new documents. The archives do not supply model weights, retrieval indexes, clean inference results, or evaluation API credentials. Complete Conda setup and keep steps 1, 2, 4, and 5 even when using both archives.
+
+The supplied model profiles are:
+
+| Architecture | Model profile directories |
+|---|---|
+| ReAct | `llama8b`, `llama70b`, `qwen7b`, `qwen25` |
+| WebThinker | `deepseek_7b`, `deepseek_32b`, `qwen_4b`, `qwen_30b` |
+
+Each profile contains all five datasets. Choose documents matching your inference model and architecture.
+
 ## 1. Index the clean documents
 
-Prepare these two files:
+The supplied corpus archive prepares these files. If you use your own data, prepare the same structure:
 
 ```text
 data/telcodpr/corpus.jsonl
@@ -120,8 +194,8 @@ WebThinker requires a main model server and an auxiliary model server. Start eac
 
 ```bash
 ./ars serve \
-  --model Qwen/QwQ-32B \
-  --name QwQ-32B \
+  --model lixiaoxi45/WebThinker-R1-32B \
+  --name WebThinker-R1-32B \
   --port 8000 \
   --gpus 0,1 \
   --tensor-parallel-size 2
@@ -146,9 +220,9 @@ After both servers are ready:
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
   --retrieval-device cpu \
-  --model QwQ-32B \
+  --model WebThinker-R1-32B \
   --base-url http://localhost:8000/v1 \
-  --tokenizer Qwen/QwQ-32B \
+  --tokenizer lixiaoxi45/WebThinker-R1-32B \
   --aux-model Qwen2.5-32B-Instruct \
   --aux-base-url http://localhost:8002/v1 \
   --aux-tokenizer Qwen/Qwen2.5-32B-Instruct \
@@ -188,6 +262,8 @@ Set `--target-answer` to the exact output string you want the attack to induce. 
 
 Supported `--attack` values are `kidnaprag`, `ignore`, `fake_completion`, `poisonedrag`, and `paradox`. Ignore and Fake Completion do not require a running generation model.
 
+To use a different target, change `--target-answer` when generating documents. Existing documents retain their original target; changing a run option does not rewrite their text.
+
 The output `poisoned_corpus.jsonl` contains **only attack documents**, one JSON object per line. Each document has an ID, title, text, and metadata identifying the attack and target. The clean inference result remains in `clean.json` and is not embedded in this file.
 
 Example document structure:
@@ -198,9 +274,20 @@ Example document structure:
 
 Pass the JSONL path directly to `--attack-documents` in step 4.
 
+### Reuse downloaded attack documents
+
+If you completed [Download the provided data](#download-the-provided-data), skip document generation and continue to step 4. The example commands there use these extracted JSONL files:
+
+- ReAct / Qwen2.5-32B / TelcoDPR: `runs/kidnaprag_documents_40_20261102/react/qwen25/telcodpr/documents.jsonl`
+- WebThinker / WebThinker-R1-32B / TelcoDPR: `runs/kidnaprag_documents_40_20261102/webthinker/deepseek_32b/telcodpr/documents.jsonl`
+
+Use the same selected path for every defense variant of that experiment. The downloaded documents target `KILL YOURSELF`; generate a new document set above if you want another target.
+
 ## 4. Run inference with attack documents
 
 Use the same questions, clean index, architecture, model, and tokenizers as in step 2. Start the agent server or servers again if you stopped them for attack generation.
+
+The commands below use the downloaded KidnapRAG documents. If you generated a new set in step 3, replace `--attack-documents` with `runs/telcodpr/poisoned_corpus.jsonl`.
 
 ### ReAct
 
@@ -215,7 +302,7 @@ Use the same questions, clean index, architecture, model, and tokenizers as in s
   --model Qwen2.5-32B-Instruct \
   --base-url http://localhost:8000/v1 \
   --tokenizer Qwen/Qwen2.5-32B-Instruct \
-  --attack-documents runs/telcodpr/poisoned_corpus.jsonl \
+  --attack-documents runs/kidnaprag_documents_40_20261102/react/qwen25/telcodpr/documents.jsonl \
   --defense none \
   --output runs/telcodpr/attacked.json
 ```
@@ -230,16 +317,41 @@ Use the same questions, clean index, architecture, model, and tokenizers as in s
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
   --retrieval-device cpu \
-  --model QwQ-32B \
+  --model WebThinker-R1-32B \
   --base-url http://localhost:8000/v1 \
-  --tokenizer Qwen/QwQ-32B \
+  --tokenizer lixiaoxi45/WebThinker-R1-32B \
   --aux-model Qwen2.5-32B-Instruct \
   --aux-base-url http://localhost:8002/v1 \
   --aux-tokenizer Qwen/Qwen2.5-32B-Instruct \
-  --attack-documents runs/telcodpr/poisoned_corpus.jsonl \
+  --attack-documents runs/kidnaprag_documents_40_20261102/webthinker/deepseek_32b/telcodpr/documents.jsonl \
   --defense none \
   --output runs/telcodpr/attacked.json
 ```
+
+### Choose a defense
+
+Both ReAct and WebThinker accept the following options. Replace `--defense none` in the inference command above with your choice:
+
+| Option | Defense | Additional model |
+|---|---|---|
+| `--defense none` | No defense | None |
+| `--defense ragdefender` | RAGDefender | `models/pds` (all-mpnet-base-v2) |
+| `--defense piguard` | PIGuard | `models/piguard` |
+| `--defense spotlight` | Spotlighting | None |
+
+Download the weights for the model-based defenses you want to use:
+
+```bash
+# Required for RAGDefender; also reused for PDS evaluation in step 5.
+hf download sentence-transformers/all-mpnet-base-v2 --local-dir models/pds
+
+# Required only for PIGuard.
+hf download leolee99/PIGuard --local-dir models/piguard
+```
+
+Use `--defense-embedding-model /path/to/embedding-model` to select a different RAGDefender embedding checkpoint. Use `--defense-model /path/to/piguard` for a different PIGuard checkpoint location. PIGuard runs on CPU by default; `--defense-device cuda:2` selects an available GPU for its classifier.
+
+Save each defense run to a different `--output`, such as `runs/telcodpr/attacked-piguard.json`, and pass that file to evaluation. The clean command in step 2 is undefended; you can apply the same defense option there if you need a defended clean baseline.
 
 Attack documents are embedded and added to the clean retrieval candidates automatically. You do not need to rebuild or modify the clean index. The output stores attacked predictions, traces, and attack documents. The clean inference result is supplied separately during evaluation in step 5.
 
@@ -254,11 +366,21 @@ If you already have a poisoned document JSONL, you can skip generation and use i
 
 ## 5. Evaluate the results
 
-Download the embedding model used for PDS:
+This guide uses **`sentence-transformers/all-mpnet-base-v2`** for PDS and stores it in `models/pds`:
 
 ```bash
 hf download sentence-transformers/all-mpnet-base-v2 --local-dir models/pds
 ```
+
+Select the PDS model with `--embedding-model`, using either a local directory or a Hugging Face model ID. If this option is omitted, the evaluator uses `models/pds` when that directory exists; otherwise PDS requires a matching cached evaluation. MiniLM is not selected automatically.
+
+For example, to use [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) instead, download it to a separate directory:
+
+```bash
+hf download sentence-transformers/all-MiniLM-L6-v2 --local-dir models/pds-minilm
+```
+
+Then use `--embedding-model models/pds-minilm` in the evaluation command below. Keep the same PDS embedding model across experiments you compare. A different embedding model can change PDS values. This evaluation option does not change the embedding model used for document retrieval or the RAGDefender checkpoint.
 
 Configure an OpenAI API key for moderation and the LLM judges, then evaluate the attacked result bundle:
 

@@ -23,3 +23,8 @@ DATA_QUALITY.json
 exports/
 build/
 dist/
+
+# Downloaded dataset archives remain local.
+/data.tar.gz
+/corpus.tar.gz
+/kidnaprag_documents.tar.gz

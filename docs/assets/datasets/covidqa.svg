@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="143" height="34" viewBox="0 0 143 34" role="img" aria-labelledby="title">
+<title id="title">COVID-QA dataset</title>
+<rect x="0.5" y="0.5" width="142" height="33" rx="8" fill="#047857"/>
+<g fill="none" stroke="#FFFFFF" stroke-width="1.4" opacity="0.95">
+<ellipse cx="18" cy="11" rx="7" ry="3"/><path d="M11 11v12c0 4 14 4 14 0V11M11 17c0 4 14 4 14 0"/>
+</g>
+<text x="34" y="22" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">COVID-QA</text>
+</svg>

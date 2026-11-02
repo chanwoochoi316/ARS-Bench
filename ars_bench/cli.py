@@ -88,7 +88,7 @@ def parser():
     e.add_argument("--offline", action="store_true", help="Use stored evaluation caches only; never call services or load models")
     e.add_argument("--shield-endpoint")
     e.add_argument("--shield-key-env", default="AZURE_CONTENT_SAFETY_KEY")
-    e.add_argument("--embedding-model", help="PDS sentence embedding model; default uses cached PDS only")
+    e.add_argument("--embedding-model", help="PDS model name/path; defaults to models/pds if present, otherwise matching cached PDS only")
     e.add_argument("--device", default="cpu")
     e.add_argument("--tokenizer", help="Recount recorded Thought+Action text with this tokenizer")
     e.add_argument("--alpha", type=float, default=0.3)
