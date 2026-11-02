@@ -133,6 +133,8 @@ def parser():
     s.add_argument("--profile", choices=["agent", "generation"], default="agent")
     s.add_argument("--gpu-memory-utilization", type=float)
     s.add_argument("--enforce-eager", action="store_true")
+    s.add_argument("--dtype", choices=["auto", "half", "float16", "bfloat16", "float", "float32"])
+    s.add_argument("--trust-remote-code", action="store_true")
 
     q = sub.add_parser("pipeline", help="Run clean -> generate -> attack -> evaluate using a JSON configuration")
     q.add_argument("--config", required=True, type=Path)
@@ -315,8 +317,10 @@ def execute(args):
                    "--max-model-len", str(length)]
         if generation or args.enforce_eager:
             command += ["--enforce-eager"]
-        if generation:
+        if generation or args.trust_remote_code:
             command += ["--trust-remote-code"]
+        if args.dtype:
+            command += ["--dtype", args.dtype]
         utilization = args.gpu_memory_utilization if args.gpu_memory_utilization is not None else (0.9 if generation else None)
         if utilization is not None:
             if not 0 < utilization <= 1:

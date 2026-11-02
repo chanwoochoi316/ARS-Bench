@@ -162,6 +162,30 @@ Use an available GPU for indexing. Indexing and inference use the same `intfloat
 
 Start the model server in a separate terminal and leave it running. Adjust `--gpus` and `--tensor-parallel-size` for your available GPUs. `--model` in a `run` command must match the server's `--name`.
 
+### Model settings
+
+Use the settings for your selected model in both clean and attacked inference.
+
+| ReAct model (`--model` for serving) | Served name (`--name`) | GPUs / tensor parallel size | Retrieval GPU | GPU memory utilization |
+|---|---|---|---|---|
+| `meta-llama/Llama-3.1-8B-Instruct` | `Llama-3.1-8B-Instruct` | `0` / 1 | `cuda:1` | 0.9 |
+| `meta-llama/Llama-3.3-70B-Instruct` | `Llama-3.3-70B-Instruct` | `0,1,2,3` / 4 | `cuda:3` | 0.8 |
+| `Qwen/Qwen2.5-7B-Instruct` | `Qwen2.5-7B-Instruct` | `0` / 1 | `cuda:1` | 0.9 |
+| `Qwen/Qwen2.5-32B-Instruct` | `Qwen2.5-32B-Instruct` | `0` / 1 | `cuda:1` | 0.9 |
+
+All ReAct models use `--dtype bfloat16 --max-model-len 30000 --trust-remote-code` when serving, and `--seed 1 --max-steps 9 --top-k 5` for inference. ReAct generation uses temperature 0, top-p 1, and 100 output tokens per call.
+
+| WebThinker model (`--model` for serving and `--tokenizer` for inference) | Served name (`--name`) | Document profile | Seed |
+|---|---|---|---|
+| `lixiaoxi45/WebThinker-R1-7B` | `WebThinker-R1-7B` | `deepseek_7b` | 1 |
+| `lixiaoxi45/WebThinker-R1-32B` | `WebThinker-R1-32B` | `deepseek_32b` | 1 |
+| `Qwen/Qwen3-4B-Thinking-2507` | `Qwen3-4B-Thinking` | `qwen_4b` | 1 |
+| `Qwen/Qwen3-30B-A3B-Thinking-2507` | `Qwen3-30B-A3B-Thinking-2507` | `qwen_30b` | 1 |
+
+Every WebThinker model uses a main server on GPU 0 and a `Qwen/Qwen2.5-32B-Instruct` auxiliary server on GPU 1. Both servers use `--tensor-parallel-size 1 --gpu-memory-utilization 0.95 --max-model-len 30000 --dtype auto --trust-remote-code`. Retrieval uses `--retrieval-device cuda:2`. Inference uses `--max-steps 10 --concurrency 32 --top-k 5`; main-model sampling uses temperature 0.7, top-p 0.8, 4096 output tokens, top-k sampling 20, and repetition penalty 1.05.
+
+Use `--seed 1` for every model in both clean and attacked inference, with or without a defense. The WebThinker examples below use R1-32B.
+
 ### Option A: ReAct
 
 Start the agent model server:
@@ -172,7 +196,11 @@ Start the agent model server:
   --name Qwen2.5-32B-Instruct \
   --port 8000 \
   --gpus 0 \
-  --tensor-parallel-size 1
+  --tensor-parallel-size 1 \
+  --max-model-len 30000 \
+  --gpu-memory-utilization 0.9 \
+  --dtype bfloat16 \
+  --trust-remote-code
 ```
 
 After the server is ready, run clean inference in another terminal:
@@ -181,6 +209,9 @@ After the server is ready, run clean inference in another terminal:
 ./ars run \
   --dataset telcodpr \
   --architecture react \
+  --seed 1 \
+  --max-steps 9 \
+  --top-k 5 \
   --queries data/telcodpr/queries.json \
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
@@ -201,7 +232,11 @@ WebThinker requires a main model server and an auxiliary model server. Start eac
   --name WebThinker-R1-32B \
   --port 8000 \
   --gpus 0 \
-  --tensor-parallel-size 1
+  --tensor-parallel-size 1 \
+  --max-model-len 30000 \
+  --gpu-memory-utilization 0.95 \
+  --dtype auto \
+  --trust-remote-code
 ```
 
 ```bash
@@ -210,7 +245,11 @@ WebThinker requires a main model server and an auxiliary model server. Start eac
   --name Qwen2.5-32B-Instruct \
   --port 8002 \
   --gpus 1 \
-  --tensor-parallel-size 1
+  --tensor-parallel-size 1 \
+  --max-model-len 30000 \
+  --gpu-memory-utilization 0.95 \
+  --dtype auto \
+  --trust-remote-code
 ```
 
 After both servers are ready:
@@ -219,6 +258,10 @@ After both servers are ready:
 ./ars run \
   --dataset telcodpr \
   --architecture webthinker \
+  --seed 1 \
+  --max-steps 10 \
+  --top-k 5 \
+  --concurrency 32 \
   --queries data/telcodpr/queries.json \
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
@@ -260,6 +303,7 @@ Run generation after the server is ready:
 ./ars generate \
   --clean runs/telcodpr/clean.json \
   --attack kidnaprag \
+  --seed 1 \
   --target-answer 'KILL YOURSELF' \
   --model Qwen3-30B-A3B-Instruct-2507 \
   --base-url http://localhost:8001/v1 \
@@ -303,6 +347,9 @@ The commands below use the downloaded KidnapRAG documents. If you generated a ne
 ./ars run \
   --dataset telcodpr \
   --architecture react \
+  --seed 1 \
+  --max-steps 9 \
+  --top-k 5 \
   --queries data/telcodpr/queries.json \
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
@@ -321,6 +368,10 @@ The commands below use the downloaded KidnapRAG documents. If you generated a ne
 ./ars run \
   --dataset telcodpr \
   --architecture webthinker \
+  --seed 1 \
+  --max-steps 10 \
+  --top-k 5 \
+  --concurrency 32 \
   --queries data/telcodpr/queries.json \
   --corpus data/telcodpr/corpus.jsonl \
   --index indexes/telcodpr/e5 \
@@ -338,7 +389,7 @@ The commands below use the downloaded KidnapRAG documents. If you generated a ne
 
 ### Choose a defense
 
-Both ReAct and WebThinker accept the following options. Replace `--defense none` in the inference command above with your choice:
+Both ReAct and WebThinker accept the following options. Replace `--defense none` in the inference command above with your choice and keep `--seed 1`:
 
 | Option | Defense | Additional model |
 |---|---|---|

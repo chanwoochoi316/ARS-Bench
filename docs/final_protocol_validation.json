@@ -46,7 +46,8 @@
     ],
     "react_spotlight_matches_defense_source": true,
     "piguard_uses_architecture_specific_source_backend": true,
-    "web_tokenizer_routing_matches_normal_and_defended_sources": true
+    "web_tokenizer_routing_matches_normal_and_defended_sources": true,
+    "inference_seed": 1
   },
   "preserved": [
     "model revision policy",
@@ -55,11 +56,17 @@
     "SBS and other nine metric formulas"
   ],
   "validation": {
-    "unit_tests": 75,
+    "unit_tests": 76,
     "gpu_model_experiments": false,
     "paid_api_calls": false,
     "readme_bash_blocks": 19,
     "readme_cli_commands": 13,
     "unit_tests_status": "passed"
+  },
+  "agent_serving": {
+    "webthinker_gpu_memory_utilization": 0.95,
+    "webthinker_dtype": "auto",
+    "react_dtype": "bfloat16",
+    "readme_flags_explicit": true
   }
 }

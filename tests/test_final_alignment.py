@@ -28,6 +28,12 @@ class ServerSettings(unittest.TestCase):
         command, _ = self.serve('--profile', 'generation', '--tensor-parallel-size', '2')
         self.assertEqual(command[command.index('--max-model-len')+1], '50000')
 
+    def test_explicit_agent_loading_and_memory_settings(self):
+        command, _ = self.serve('--dtype', 'bfloat16', '--trust-remote-code', '--gpu-memory-utilization', '0.95')
+        self.assertEqual(command[command.index('--dtype')+1], 'bfloat16')
+        self.assertEqual(command[command.index('--gpu-memory-utilization')+1], '0.95')
+        self.assertIn('--trust-remote-code', command)
+
     def test_agent_server_retains_existing_defaults(self):
         command, _ = self.serve()
         self.assertEqual(command[command.index('--max-model-len')+1], '30000')
