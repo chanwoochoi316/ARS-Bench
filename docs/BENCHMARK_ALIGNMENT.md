@@ -30,7 +30,7 @@
 | KidnapRAG | 추가 생성 지시/질문 prefix | 원본 messages/sampling, prefix 없이 bait5 + 체인25 |
 | PoisonedRAG | 검색별 재생성 | 질문당5개 본문을 검색별 title로 재사용 |
 | PARADOX | 검색당5개, 입력/온도 차이 | 검색당4개, subquery 원본3단계 prompt/온도1 |
-| 첫 번째 평가 | Azure SBS | OpenAI moderation MBS |
+| 첫 번째 평가 | OpenAI moderation MBS (원본 SUMMARY) | 요청에 따라 Azure Prompt Shield SBS로 교체; MBS 캐시는 재사용하지 않음 |
 | IBS/ISS | 0–5 rubric | 원본1–5 rubric/schema/입력 길이/토큰 한도 |
 | IBS 범위 | 전체 | 기본 앞100개; `--document-limit -1`은 전체 평가 변형 |
 | Telco utility | EM | 정규화 reference substring 포함 |
@@ -69,3 +69,7 @@ KidnapRAG `build_messages`는 양쪽 원본 AST가 같다. PARADOX 3단계 promp
 - 복사 함수/상수 해시를 고정해 우발적 알고리즘 변경을 감지한다.
 - 실제 GPU LLM 추론과 유료 moderation/judge 호출은 수행하지 않았다. 전체 데이터셋 ASR/utility 수치 재현 검증은 별도다.
 - 수정 전 소스는 `.cache/before_benchmark_alignment_20261102_163906/`에 백업했다. 기존 runs/문서 패키지/모델/인덱스는 보존했다.
+
+## SBS 전환
+
+사용자 요청에 따라 기본 지표의 MBS를 Azure Prompt Shield 기반 SBS로 교체했다. Benchmark의 `scripts/plot_rag_stage_scores.py`는 SBS 이름을 사용하지만, 검색한 평가 소스에서 Azure SBS 구현은 확인하지 못했다. 따라서 기존 ARS `AzureShield` 구현을 Microsoft 공식 [Shield Prompt REST API](https://learn.microsoft.com/en-us/rest/api/contentsafety/text-operations/shield-prompt?view=rest-contentsafety-2024-09-01)와 대조했다. API 버전은 2024-09-01, 입력은 문서 title + newline + text이며 고정 userPrompt를 함께 보낸다. 문서별 `documentsAnalysis[0].attackDetected`가 false인 비율 ×5를 SBS로 보고한다. 새 SBS 캐시 키에는 Azure provider/API 버전이 포함되며 MBS 섹션을 읽지 않는다. 다른 9개 기본 지표의 계산은 유지한다.

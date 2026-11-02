@@ -4,7 +4,7 @@ import numpy as np
 from ._benchmark import response_metrics as response, pds, efficiency as source_efficiency
 from ._benchmark.ufs import relative_ufs
 
-METRICS = ('MBS', 'IBS', 'QLES', 'SLES', 'PDS', 'ISS', 'UFS', 'RCS', 'LI', 'TUI')
+METRICS = ('SBS', 'IBS', 'QLES', 'SLES', 'PDS', 'ISS', 'UFS', 'RCS', 'LI', 'TUI')
 
 
 def legacy_record(record):

@@ -372,9 +372,11 @@ The default PDS embedding model is **`sentence-transformers/all-mpnet-base-v2`**
 hf download sentence-transformers/all-mpnet-base-v2 --local-dir models/pds
 ```
 
-Configure an OpenAI API key for moderation and the LLM judges, then evaluate the attacked result bundle:
+Configure Azure AI Content Safety for SBS and an OpenAI API key for the IBS/ISS LLM judges, then evaluate the attacked result bundle:
 
 ```bash
+export AZURE_CONTENT_SAFETY_ENDPOINT='https://YOUR-RESOURCE.cognitiveservices.azure.com'
+export AZURE_CONTENT_SAFETY_KEY='YOUR_AZURE_CONTENT_SAFETY_KEY'
 export OPENAI_API_KEY='YOUR_OPENAI_API_KEY'
 
 ./ars evaluate runs/telcodpr/attacked.json \
@@ -387,7 +389,11 @@ export OPENAI_API_KEY='YOUR_OPENAI_API_KEY'
   --require-all
 ```
 
-Evaluation computes **MBS, IBS, QLES, SLES, PDS, ISS, UFS, RCS, LI, and TUI**. It calls the moderation API and LLM judges. IBS evaluates the first 100 attack documents by default; add `--document-limit -1` to evaluate all attack documents.
+Evaluation computes **SBS, IBS, QLES, SLES, PDS, ISS, UFS, RCS, LI, and TUI**.
+
+SBS uses [Microsoft Azure Prompt Shield](https://learn.microsoft.com/en-us/rest/api/contentsafety/text-operations/shield-prompt?view=rest-contentsafety-2024-09-01), not OpenAI Moderation: each attack document (title + text) is submitted to the document-injection endpoint, and SBS is `5 × the fraction of documents with attackDetected=false`. Higher SBS means more attack documents evade detection. Azure evaluation is enabled automatically when the endpoint environment variable is set; `--shield-endpoint` and `--shield-key-env` can override the endpoint and key variable.
+
+IBS and ISS use the configured LLM judge. IBS evaluates the first 100 attack documents by default; add `--document-limit -1` to evaluate all attack documents.
 
 Outputs:
 
@@ -396,6 +402,8 @@ runs/telcodpr/report.json         Metric values, status, and evaluation details
 runs/telcodpr/report.csv          Metric table
 runs/telcodpr/report.bundle.json  Result bundle with reusable evaluation caches
 ```
+
+If Azure credentials are unavailable, SBS is reported as missing. Historical MBS (OpenAI Moderation) caches are not reused as SBS; rerun evaluation with Azure configured.
 
 Unavailable metrics are reported as `null` with a reason. With `--require-all`, the command returns exit code 2 if any metric is unavailable.
 

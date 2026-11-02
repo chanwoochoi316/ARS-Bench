@@ -75,16 +75,13 @@ def parser():
     e.add_argument("--clean", type=Path, help="Clean inference result, if not already paired in the attacked result")
     e.add_argument("--metric-profile", choices=["benchmark", "instrumented"], default="benchmark")
     e.add_argument("--document-limit", type=int, default=100, help="Benchmark IBS evaluates first 100 documents; -1 evaluates all")
-    e.add_argument("--moderation-base-url", default="https://api.openai.com/v1")
-    e.add_argument("--moderation-model", default="omni-moderation-latest")
-    e.add_argument("--moderation-key-env", default="OPENAI_API_KEY")
     e.add_argument("--output", required=True, type=Path)
     e.add_argument("--enriched-output", type=Path, help="Bundle with expensive evaluation caches; default <report>.bundle.json")
     e.add_argument("--judge-base-url", default=os.environ.get("ARS_JUDGE_BASE_URL") or ("https://api.openai.com/v1" if os.environ.get("OPENAI_API_KEY") else None),
                    help="LLM judge endpoint; auto-enabled when OPENAI_API_KEY or ARS_JUDGE_BASE_URL is set")
     e.add_argument("--judge-model", default="gpt-4o")
     e.add_argument("--judge-key-env", default="OPENAI_API_KEY")
-    e.add_argument("--azure-shield", action="store_true")
+    e.add_argument("--azure-shield", action="store_true", help="Enable Azure Prompt Shield for SBS (also enabled by a configured endpoint)")
     e.add_argument("--offline", action="store_true", help="Use stored evaluation caches only; never call services or load models")
     e.add_argument("--shield-endpoint")
     e.add_argument("--shield-key-env", default="AZURE_CONTENT_SAFETY_KEY")
@@ -239,7 +236,7 @@ def execute(args):
         print("Imported. Legacy aggregate wall times are not converted into per-query reasoning times.")
     elif args.command == "evaluate":
         from .evaluation import evaluate, export_report
-        from .judges import AzureShield, OpenAIModeration
+        from .judges import AzureShield
         from .metrics import Embeddings
         from .agents import TokenCounter
         obj = load_bundle(args.result, read(args.clean) if args.clean else None)
@@ -247,11 +244,8 @@ def execute(args):
         if enriched.resolve() == args.output.resolve():
             raise ValueError("Report and enriched bundle must have different paths")
         judge = Client(args.judge_base_url, args.judge_model, args.judge_key_env) if args.judge_base_url and not args.offline else None
-        shield_enabled = args.azure_shield or (os.environ.get("AZURE_CONTENT_SAFETY_ENDPOINT") and os.environ.get(args.shield_key_env))
-        if args.metric_profile == "benchmark":
-            shield = OpenAIModeration(args.moderation_base_url, args.moderation_model, args.moderation_key_env) if not args.offline else None
-        else:
-            shield = AzureShield(args.shield_endpoint, args.shield_key_env) if shield_enabled and not args.offline else None
+        shield_enabled = args.azure_shield or args.shield_endpoint or os.environ.get("AZURE_CONTENT_SAFETY_ENDPOINT")
+        shield = AzureShield(args.shield_endpoint, args.shield_key_env) if shield_enabled and not args.offline else None
         embedding_model = args.embedding_model or (str(ROOT / "models/pds") if (ROOT / "models/pds").is_dir() else None)
         embedder = Embeddings(embedding_model, args.device) if embedding_model and not args.offline else None
         report = evaluate(obj, judge, shield, embedder, args.judge_model, args.alpha,

@@ -69,7 +69,7 @@ class HTTPWorkflow(unittest.TestCase):
                 self.assertEqual(report["metrics"]["TUI"]["status"], "ok")
                 self.assertEqual(report["metrics"]["TUI"]["value"], 0)
                 self.assertEqual(report["metric_profile"], "benchmark")
-                self.assertIn("MBS", report["metrics"])
+                self.assertIn("SBS", report["metrics"])
                 self.assertTrue((p/"report.csv").exists())
         finally:
             server.shutdown(); server.server_close(); thread.join()

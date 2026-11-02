@@ -52,7 +52,6 @@ def evaluate(bundle, judge=None, shield=None, embedder=None, judge_model="gpt-4o
                     ("reference containment" if experiment["dataset"] == "telcodpr" else "normalized ROUGE-L F1"),
             LI_TUI="Benchmark ratio of aggregate averages; LI uses source summary.time; TUI uses the original text heuristic",
             judge_rubric="Benchmark 1..5", IBS_document_limit=document_limit,
-            MBS_guardrail="OpenAI moderation (not Azure Prompt Shield)",
             missing_reference_policy="Benchmark excludes empty references for LegalBenchRAG/TelcoDPR")
     def save():
         if checkpoint:
@@ -94,13 +93,13 @@ def evaluate(bundle, judge=None, shield=None, embedder=None, judge_model="gpt-4o
     docs = bundle["documents"]
     for name in ("SBS", "IBS"):
         values, failures = [], []
-        section = cache.setdefault("MBS" if benchmark and name == "SBS" else name, {})
+        section = cache.setdefault(name, {})
         selected_docs = docs[:document_limit] if benchmark and name == "IBS" and document_limit > 0 else docs
         for d in selected_docs:
             text = f"{d['title']}\n{d['text']}"
             identity = {"text": text, "metric": name,
-                        "provider": (getattr(shield, "provider", "openai-moderation:omni-moderation-latest") if benchmark else "azure-prompt-shield") if name == "SBS" else judge_model,
-                        "rubric": "benchmark-v1" if benchmark else "paper-A3-v1"}
+                        "provider": "azure-prompt-shield" if name == "SBS" else judge_model,
+                        "rubric": "azure-prompt-shield-2024-09-01-v1" if name == "SBS" else ("benchmark-v1" if benchmark else "paper-A3-v1")}
             key = digest(identity)
             annotation = section.get(key)
             if annotation is None:
@@ -110,7 +109,7 @@ def evaluate(bundle, judge=None, shield=None, embedder=None, judge_model="gpt-4o
                     elif name == "IBS" and judge:
                         annotation = benchmark_judgment(judge, "ibs", d) if benchmark else judgment(judge, "ibs", text)
                     else:
-                        raise ValueError("Need cached document judgments or " + (("OpenAI moderation credentials" if benchmark else "Azure Prompt Shield credentials") if name == "SBS" else "a configured LLM judge"))
+                        raise ValueError("Need cached document judgments or " + ("Azure Prompt Shield credentials" if name == "SBS" else "a configured LLM judge"))
                     section[key] = {**annotation, "input_digest": key}
                     save()
                 except (ValueError, RuntimeError, KeyError) as exc:
@@ -193,10 +192,6 @@ def evaluate(bundle, judge=None, shield=None, embedder=None, judge_model="gpt-4o
          reason=f"{len(pds_failures)}/{len(pairs)} path comparisons missing or failed" if pds_failures else None, count=len(pds_values))
     result["complete"] = all(result["metrics"][k]["status"] == "ok" for k in metrics.METRICS)
     if benchmark:
-        result["metrics"]["MBS"] = result["metrics"].pop("SBS")
-        result["details"]["MBS"] = result["details"].pop("SBS")
-        result["dimensions"]["document_ingestion"] = ["MBS", "IBS"]
-        result["definitions"].pop("SBS_guardrail", None)
         result["metrics"] = {name: result["metrics"][name] for name in selected.METRICS}
     result["metric_order"] = list(selected.METRICS)
     save()

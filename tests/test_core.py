@@ -244,5 +244,70 @@ class EvaluationAndAgents(unittest.TestCase):
         self.assertEqual(extract_final("answer \\boxed{a{b}c}"), "a{b}c")
 
 
+
+class AzureSBSRegression(unittest.TestCase):
+    def test_old_mbs_cache_is_not_reused_and_sbs_replays_offline(self):
+        b = fixture()
+        b['documents'].append({'id': 'p2', 'title': 'detected', 'text': 'injection'})
+        legacy = {'old-openai-cache': {'flagged': False, 'provider': 'openai-moderation:omni-moderation-latest'}}
+        b['evaluation_cache'] = {'benchmark-v1': {'MBS': copy.deepcopy(legacy)}}
+        missing = evaluate(b, profile='benchmark')
+        self.assertEqual(missing['metrics']['SBS']['status'], 'missing')
+        class Shield:
+            def evaluate(self, text):
+                return {'flagged': text.startswith('detected\n'), 'provider': 'azure-prompt-shield'}
+        report = evaluate(b, shield=Shield(), profile='benchmark')
+        self.assertEqual(report['metrics']['SBS']['value'], 2.5)
+        self.assertEqual(report['metrics']['SBS']['n'], 2)
+        self.assertNotIn('MBS', report['metrics'])
+        self.assertEqual(report['dimensions']['document_ingestion'], ['SBS', 'IBS'])
+        self.assertEqual(b['evaluation_cache']['benchmark-v1']['MBS'], legacy)
+        self.assertEqual(evaluate(b, profile='benchmark')['metrics']['SBS'], report['metrics']['SBS'])
+        b['documents'][0]['text'] = 'changed'
+        self.assertEqual(evaluate(b, profile='benchmark')['metrics']['SBS']['status'], 'missing')
+
+    def test_azure_request_and_non_boolean_response(self):
+        import os
+        from unittest.mock import patch
+        from ars_bench.judges import AzureShield
+        response = {'userPromptAnalysis': {'attackDetected': True},
+                    'documentsAnalysis': [{'attackDetected': False}]}
+        with patch.dict(os.environ, {'TEST_SHIELD_KEY': 'synthetic-key'}), patch('ars_bench.judges.post', return_value=response) as post:
+            shield = AzureShield('https://synthetic.invalid/', 'TEST_SHIELD_KEY')
+            self.assertFalse(shield.evaluate('title\nbody')['flagged'])
+            url, payload, headers = post.call_args.args
+            self.assertEqual(url, 'https://synthetic.invalid/contentsafety/text:shieldPrompt?api-version=2024-09-01')
+            self.assertEqual(payload['documents'], ['title\nbody'])
+            self.assertIn('userPrompt', payload)
+            self.assertEqual(headers, {'Ocp-Apim-Subscription-Key': 'synthetic-key'})
+            response['documentsAnalysis'][0]['attackDetected'] = 'false'
+            with self.assertRaisesRegex(ValueError, 'non-boolean'):
+                shield.evaluate('title\nbody')
+
+    def test_cli_uses_azure_for_default_profile_without_enable_flag(self):
+        import os
+        import contextlib
+        import io
+        from unittest.mock import patch
+        from ars_bench.cli import main
+        from ars_bench.io import read
+        response = {'documentsAnalysis': [{'attackDetected': True}]}
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {'AZURE_CONTENT_SAFETY_ENDPOINT': 'https://synthetic.invalid', 'AZURE_CONTENT_SAFETY_KEY': 'synthetic-key'}, clear=True), patch('ars_bench.judges.post', return_value=response) as post, patch('ars_bench.metrics.Embeddings', return_value=None), contextlib.redirect_stdout(io.StringIO()):
+            root = Path(tmp)
+            write(root/'result.json', fixture())
+            code = main(['evaluate', str(root/'result.json'), '--output', str(root/'report.json'), '--require-all'])
+            self.assertEqual(code, 2)  # Other judges/embeddings are deliberately unavailable.
+            report = read(root/'report.json')
+            self.assertEqual(report['metric_profile'], 'benchmark')
+            self.assertEqual(report['metrics']['SBS']['value'], 0)
+            self.assertNotIn('MBS', (root/'report.csv').read_text())
+            self.assertIn('SBS', (root/'report.csv').read_text())
+            self.assertEqual(post.call_count, 1)
+            post.reset_mock()
+            main(['evaluate', str(root/'report.bundle.json'), '--offline', '--output', str(root/'offline.json')])
+            post.assert_not_called()
+            self.assertEqual(read(root/'offline.json')['metrics']['SBS']['value'], 0)
+
+
 if __name__ == "__main__":
     unittest.main()

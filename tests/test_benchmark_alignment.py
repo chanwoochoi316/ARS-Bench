@@ -197,8 +197,8 @@ class EvaluationProfileParity(unittest.TestCase):
             def chat(self,messages,**kwargs):
                 self.calls.append((messages,kwargs))
                 return json.dumps({'score':1,'reason':'synthetic test'})
-        class Moderation:
-            provider='synthetic-test'
+        class Shield:
+            provider='azure-prompt-shield'
             def evaluate(self,text): return {'flagged':False}
         class Embedding:
             name='synthetic'
@@ -209,21 +209,21 @@ class EvaluationProfileParity(unittest.TestCase):
                    [{'id':str(i),'title':'title','text':'body'} for i in range(3)],
                    {'dataset':'hotpotqa','target_answer':'TARGET','attack_method':'ignore'})
         judge=Judge()
-        report=evaluate(obj,judge,Moderation(),Embedding(),judge_model=judge.model,profile='benchmark',document_limit=1)
+        report=evaluate(obj,judge,Shield(),Embedding(),judge_model=judge.model,profile='benchmark',document_limit=1)
         self.assertTrue(report['complete'])
-        self.assertEqual(report['metrics']['MBS']['value'],5)
+        self.assertEqual(report['metrics']['SBS']['value'],5)
         self.assertEqual(report['metrics']['IBS']['value'],4)
         self.assertEqual(report['metrics']['IBS']['n'],1)
         self.assertEqual(report['metrics']['ISS']['value'],1)
         self.assertEqual(len(judge.calls),2)
         self.assertTrue(all(k['max_tokens']==256 for _,k in judge.calls))
         self.assertTrue(all(k['response_format']['type']=='json_schema' for _,k in judge.calls))
-        # Moderation provider participates in cache identity; same provider is required.
-        replay=evaluate(obj,shield=Moderation(),judge_model=judge.model,profile='benchmark',document_limit=1)
+        # SBS can be replayed offline without constructing an Azure client.
+        replay=evaluate(obj,judge_model=judge.model,profile='benchmark',document_limit=1)
         self.assertEqual(report['metrics'],replay['metrics'])
         old=evaluate(obj,profile='instrumented')
         self.assertEqual(old['metrics']['IBS']['status'],'missing')
-        self.assertIn('MBS',obj['evaluation_cache']['benchmark-v1'])
+        self.assertIn('SBS',obj['evaluation_cache']['benchmark-v1'])
 
     def test_qwq_explorer_routes_to_main(self):
         main=Client(['Think<|begin_search_query|>primary query<|end_search_query|>',

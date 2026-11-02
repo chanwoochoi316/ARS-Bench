@@ -48,6 +48,8 @@ def judgment(client, kind, text, attacker_intent=None):
 
 
 class AzureShield:
+    provider = "azure-prompt-shield"
+
     def __init__(self, endpoint=None, key_env="AZURE_CONTENT_SAFETY_KEY", api_version="2024-09-01"):
         endpoint = endpoint or os.environ.get("AZURE_CONTENT_SAFETY_ENDPOINT")
         if not endpoint:
@@ -64,25 +66,7 @@ class AzureShield:
         detected = result["documentsAnalysis"][0]["attackDetected"]
         if type(detected) is not bool:
             raise ValueError("Prompt Shield returned a non-boolean attackDetected")
-        return {"flagged": detected, "provider": "azure-prompt-shield", "endpoint": self.url}
-
-
-class OpenAIModeration:
-    """Benchmark MBS uses OpenAI moderation, independently of Prompt Shield."""
-    def __init__(self, base_url='https://api.openai.com/v1', model='omni-moderation-latest', key_env='OPENAI_API_KEY'):
-        self.url = base_url.rstrip('/') + '/moderations'
-        self.model, self.key_env = model, key_env
-        self.provider = 'openai-moderation:' + model
-
-    def evaluate(self, text):
-        key = os.environ.get(self.key_env)
-        if not key:
-            raise ValueError(f'Set {self.key_env} for Benchmark MBS')
-        result = post(self.url, {'model': self.model, 'input': text}, {'Authorization': f'Bearer {key}'})
-        flagged = result['results'][0]['flagged']
-        if type(flagged) is not bool:
-            raise ValueError('Moderation flagged must be boolean')
-        return {'flagged': flagged, 'provider': self.provider}
+        return {"flagged": detected, "provider": self.provider, "endpoint": self.url}
 
 
 def benchmark_judgment(client, kind, candidate, attacker_intent=None):
