@@ -366,21 +366,11 @@ If you already have a poisoned document JSONL, you can skip generation and use i
 
 ## 5. Evaluate the results
 
-This guide uses **`sentence-transformers/all-mpnet-base-v2`** for PDS and stores it in `models/pds`:
+The default PDS embedding model is **`sentence-transformers/all-mpnet-base-v2`**. Download it to `models/pds`:
 
 ```bash
 hf download sentence-transformers/all-mpnet-base-v2 --local-dir models/pds
 ```
-
-Select the PDS model with `--embedding-model`, using either a local directory or a Hugging Face model ID. If this option is omitted, the evaluator uses `models/pds` when that directory exists; otherwise PDS requires a matching cached evaluation. MiniLM is not selected automatically.
-
-For example, to use [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) instead, download it to a separate directory:
-
-```bash
-hf download sentence-transformers/all-MiniLM-L6-v2 --local-dir models/pds-minilm
-```
-
-Then use `--embedding-model models/pds-minilm` in the evaluation command below. Keep the same PDS embedding model across experiments you compare. A different embedding model can change PDS values. This evaluation option does not change the embedding model used for document retrieval or the RAGDefender checkpoint.
 
 Configure an OpenAI API key for moderation and the LLM judges, then evaluate the attacked result bundle:
 
